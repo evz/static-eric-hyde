@@ -1,0 +1,20 @@
+---
+title: A basic blog
+extends: listing.j2
+default_block: test
+listable: false
+---
+
+{% from "macros.j2" import render_excerpt with context %}
+<section class="blog_excerpt">
+{% set latest = site.content.walk_resources_sorted_by_time() %}
+
+{% if latest -%}
+{{ render_excerpt(latest, 'post') }}
+
+<a class="button white medium"
+    href="{{ content_url(latest.url) }}">Read more&hellip;</a>
+
+{%- endif %}
+
+</section>

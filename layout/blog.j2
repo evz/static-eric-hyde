@@ -1,0 +1,34 @@
+{% extends "base.j2" %}
+
+{% block main -%}
+<article class="post">
+<h1 class="posttitle">{{ resource.meta.title }}</h1>
+<time class="post-author" datetime="{{ resource.meta.created.strftime('%Y-%m-%d') }}">
+    Posted: {{ resource.meta.created.strftime('%a, %d %b %Y') }}
+</time>
+<a href="http://twitter.com/share"
+    class="twitter-share-button"
+    data-count="horizontal"
+    data-via="{{ tweet_via }}">Tweet</a>
+    <script type="text/javascript"
+        src="http://platform.twitter.com/widgets.js"></script>
+<div class="entry">
+{% filter markdown|typogrify %}
+{% mark post %}
+{% block post %}{% endblock %}
+{% endmark %}
+{% endfilter %}
+</div>
+{% if resource.meta.tags %}
+<div class="post-metadata alt">
+    <p><strong>Tags: </strong>
+{% for tag in resource.meta.tags %}
+    <a class="small" href="{{ content_url('blog/tags/'~tag~'.html') }}">
+        {{ tag }}
+    </a>
+{% endfor %}
+</p>
+{% endif %}
+</article>
+
+{%- endblock %}

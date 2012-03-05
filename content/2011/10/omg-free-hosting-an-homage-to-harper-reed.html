@@ -1,0 +1,63 @@
+---
+title: "OMG FREE HOSTING: An homage to Harper Reed"
+description: Configuring a static site on Google AppEngine
+created: !!timestamp '2011-10-22 10:30:00'
+tags:
+    - Google
+    - AppEngine
+    - WordPress
+    - Droplet
+---
+
+**Update 3/2/2012** If anyone out there is a tinkerer, they probably know that well enough is never enough. Since I wrote this all those months ago, I&rsquo;ve actually totally changed the brains behind this site to use an entirely different and, in my opinion, much cleaner approach involving [Hyde](http://hyde.github.com/) and an S3 bucket. And that&rsquo;s about it.
+
+{% mark excerpt %}
+
+Back in January, I read [this](http://www.nata2.org/2011/01/26/how-to-use-app-engine-to-host-static-sites-for-free/) and thought it was a pretty cool idea. For some reason, I just kinda filed it away and didn&rsquo;t really think about it until sometime in the early morning hours of October 22 when I got the urge to write about [this](2010-census-leveraging-whats-already-been-done.html) but didn&rsquo;t really have anywhere to do it. {% endmark %} Add to that the fact that I my brain starts hurting when I start to see the long road of configuring and deploying a site, whatever the platform. I just wanted something that would kinda be there, look presentable out of the box, and not have anything to do with PHP. 
+
+What I came up with looks a little like this:
+
+1. WordPress stack running locally on a [Vagrant VM](http://vagrantup.com/) (OK, OK, so, there is a bit of PHP)
+2. [Really Static](http://wordpress.org/extend/plugins/really-static/) WordPress plugin to render content as flat HTML
+3. A bit of symlink magic to get all the necessary static files from the theme and the flat HTML files into one directory
+4. A [Github repo](https://github.com/evz/static-eric) where I push all the junk from above and a post-receive hook to sync it with AppEngine
+5. [Drydrop](http://drydrop.binaryage.com/) to setup the Google AppEngine project
+
+In the end, it was pretty simple. Probably because I insist on only skimming the directions when setting these things up, I did run into a few pitfalls which I&rsquo;ll share here.
+
+**AppEngine and DryDrop setup**
+
+When you actually get into it, AppEngine is pretty nifty. Breaking into it by trying to use it for something that it wasn&rsquo;t really meant to do is not something I recommend unless you&rsquo;re smarter than me ([or Dutch,](http://www.python.org/dev/peps/pep-0020/) apparently). It&rsquo;s kinda like watching a movie from the other side of the screen, or something. After downloading DryDrop, it took me quite a while to figure out that it expected you to have the AppEngine SDK setup in the way that it gets setup when you install it on OS X. DryDrop looks for the SDK files in /usr/local and if you&rsquo;re trying to make this work on something like Ubuntu, you either need to take that into account, or just get a Mac. Once you get over that, DryDrop works like a charm. Oh, and, it seems that if you want to use a custom domain with your AppEngine account, you&rsquo;ve got to set it up on Google Apps, which is also free, but it&rsquo;s yet another hassle.
+
+The other big, big thing that I ran into was the way that AppEngine is very literal when it comes to static content. The way that the Really Static plugin spits out content is the way that you&rsquo;d expect it to if you were going to be hosting it on a box using Apache or something. So, to fake the pretty URLs, it makes a folder with an index.html file inside (which something like Apache would use by default when serving that URL). AppEngine is not Apache. What I finally came up with was to put this into the DryDrop site.yaml (which is kind of a slimmed down version of the normal app.yaml that AppEngine normally uses).
+
+    handlers:
+    - url: /(.*)/(.*)/(.*)/(.*)/
+    static_files: \1/\2/\3/\4/index.html
+    upload: .*/.*/.*/.*/index\.html
+    - url: /(.*)/(.*)/(.*)/
+    static_files: \1/\2/\3/index.html
+    upload: .*/.*/.*/index\.html
+    - url: /(.*)/(.*)/
+    static_files: \1/\2/index.html
+    upload: .*/.*/index\.html
+    - url: /(.*)/
+    static_files: \1/index.html
+    upload: .*/index\.html
+    - url: '/'
+    static_files: 'index.html'
+    upload: '.*'
+    - url: '/'
+    static_dir: '/'
+
+It&rsquo;s kinda hacky, but it works. It basically uses the regexes to find the appropriate index.html files so that I can keep my pretty URLs.
+
+**WordPress**
+
+I struggle with Apache. I&rsquo;m allergic to PHP. But my fear/loathing of fiddling with UI stuff for my own personal outweighs that so I went and grabbed [XAMPP](http://www.apachefriends.org/en/xampp.html) and segregated my WordPress installation onto it&rsquo;s own little VM. That way if I get really pissed off and just can&rsquo;t take it anymore, I can do ``vagrant destroy`` and then it will know who&rsquo;s boss. I tried a bunch of different ways of getting flat HTML out of WordPress but the Really Static plugin was by far the best. It&rsquo;s one of those things that just kinda works. For those of you out there that are looking to make WordPress really, really fast by static-ifying it, this plugin not only creates the flat files for you, but will change the links to use a different domain and upload them to a remote server all when ever the database is changed. So, uh, I&rsquo;m not sure why anyone would put up with hosting a WordPress site anymore. Oh, there is that one thing:
+
+**Search**
+
+This is the one thing I have yet to figure out. I&rsquo;m looking at using [Tapir](http://tapirgo.com/), but that involves building an RSS feed which is possible for a flat site but I&rsquo;ll need to figure out a way to put this into my workflow so that it isn&rsquo;t a pain in the ass. In the meantime, I&rsquo;m not too worried about it cause there&rsquo;s only like 2 posts and a page. So, you&rsquo;re on your own there.
+
+I suppose this is just the beginning. I&rsquo;m hoping this is a sustainable solution and Google doesn&rsquo;t catch on and start charging me cause it&rsquo;s pretty slick.
