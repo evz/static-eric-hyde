@@ -22,10 +22,13 @@
 !!python/unicode 'blog/tags/thoughts.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'index.html': [blog.j2, listing.j2, base.j2, analytics.j2, !!python/unicode '2011/10/2010-census-leveraging-whats-already-been-done.html',
   !!python/unicode '2011/10/omg-free-hosting-an-homage-to-harper-reed.html', macros.j2]
+!!python/unicode 'media/css/original.css': []
 !!python/unicode 'media/css/site.css': []
 !!python/unicode 'media/css/style.css': []
 !!python/unicode 'media/css/syntax.css': []
 !!python/unicode 'media/js/libs/dd_belatedpng.js': []
 !!python/unicode 'media/js/libs/jquery-1.5.1.min.js': []
 !!python/unicode 'media/js/libs/modernizr-1.7.min.js': []
+!!python/unicode 'media/sass/_framework.scss': []
+!!python/unicode 'media/sass/style.scss': []
 !!python/unicode 'portfolio/index.html': [base.j2, macros.j2, analytics.j2]

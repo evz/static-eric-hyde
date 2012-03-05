@@ -29,22 +29,31 @@
   <!-- All JavaScript at the bottom, except for Modernizr which
         enables HTML5 elements & feature detects -->
     <script src="{{ media_url('js/libs/modernizr-1.7.min.js') }}"></script>
+    <!--[if lt IE 9]>
+    	<script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+    <![endif]-->
   {% endblock headjs %}
   {% block endhead %}{% endblock endhead %}
 </head>
 <body id="{{ resource.meta.id if resource.meta.id else resource.slug }}">
   {% block content %}
-  <div id="container">
+  {# <div id="container"> #}
       {% block container %}
-      <div id="main" role="main">
-          <header id="header" class="banner clearfix">
-          {% block header -%}
-            <h1 id="blog-title"><a href="/">Eric van Zanten - Statically</a></h1>
-            <h2 class="breadcrumb"><!-- Figure out breadcrumbs--></h2>
-          {%- endblock %}
-          </header>
+      {# <div id="main" role="main"> #}
+          {# <header id="header" class="banner clearfix"> #}
+          {# {% block header -%} #}
+          {#   <h1 id="blog-title"><a href="/">Eric van Zanten - Statically</a></h1> #}
+          {#   <h2 class="breadcrumb"><!-- Figure out breadcrumbs--></h2> #}
+          {# {%- endblock %} #}
+          {# </header> #}
           <section id="wrapper" class="content">
           <div id="left-col">
+              <header id="header" class="banner clearfix">
+              {% block header -%}
+                <h1 id="blog-title"><a href="/">Eric van Zanten - Statically</a></h1>
+                <h2 class="breadcrumb"><!-- Figure out breadcrumbs--></h2>
+              {%- endblock %}
+              </header>
             {% block nav %}
             <div id="menu">
                 <ul>
@@ -71,9 +80,9 @@
           <footer id="footer">
               Copyright &copy; 2012 Eric van Zanten,  Powered by <a href="http://ringce.com/hyde">hyde</a>.
           </footer>
-      </div>
+      {# </div> #}
     {% endblock container %}
-  </div> <!--! end of #container -->
+  {# </div> <!--! end of #container --> #}
   {% endblock content%}
   {% block js %}
   <!-- Javascript at the bottom for fast page loading -->
