@@ -250,10 +250,7 @@ h1, h2 {
 
 .children, .sub-menu {margin: 0; padding: 0 0 0 15px;}
 
-.widgettitle + ul,
-.widgettitle + form,
-.widgettitle + div 
-{display: none;} /* Created so widgets could drop down on touch */
+ /* Created so widgets could drop down on touch */
 
 .plus {padding-right: 18px;	background: url('../images/plus.png') right 40% no-repeat;}
 
@@ -283,6 +280,7 @@ ol li, #sidebar ol {list-style: decimal outside;} /* I don't quite know when num
 	padding: 0;
 	margin: 0;
 	width: 250px;
+	float: right;
 }
 
 #s {
@@ -323,8 +321,8 @@ ol li, #sidebar ol {list-style: decimal outside;} /* I don't quite know when num
         border-bottom: 1px solid #aeaeae;
         padding: 0;
     }
-    .plus {padding-left: 18px;	background: url('../images/plus.png') left 40% no-repeat;}
     .page_item {text-align: left;}
     #menu ul {margin: 0; padding: 0 10px}
     #right-col {width: auto; float: none; margin-top: 15px;}
+    #searchform {float: none}
 }

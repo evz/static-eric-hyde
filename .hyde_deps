@@ -2,8 +2,7 @@
   blog.j2, base.j2, analytics.j2]
 !!python/unicode '2011/10/omg-free-hosting-an-homage-to-harper-reed.html': [blog.j2,
   base.j2, analytics.j2]
-!!python/unicode '2011/index.html': [blog.j2, listing.j2, base.j2, analytics.j2, !!python/unicode '2011/10/2010-census-leveraging-whats-already-been-done.html',
-  !!python/unicode '2011/10/omg-free-hosting-an-homage-to-harper-reed.html', macros.j2]
+!!python/unicode '2011/index.html': [listing.j2, macros.j2, base.j2, analytics.j2]
 !!python/unicode 'about-this-site.html': [base.j2, analytics.j2]
 !!python/unicode 'about.html': [base.j2, analytics.j2]
 !!python/unicode 'blog/angry-post.html': []
