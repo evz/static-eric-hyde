@@ -36,7 +36,7 @@ tagger:
     archives:
         blog:
             source: 2011
-            target: blog/tags
+            target: tags
             template: tagged_posts.j2
             archive_extension: html
             meta:

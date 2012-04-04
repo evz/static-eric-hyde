@@ -42,10 +42,13 @@
                 <div id="feed-container">
                     <p><a id="feed_link" href="http://feeds.feedburner.com/static-eric">Subscribe to the RSS Feed</a></p>
                 </div>
-    			<h3 class="widgettitle plus">Search</h3>
+                <div>
                 <form id="searchform">
-                <div><input type="text" id="s" name="s"><input type="button" value="Search" id="searchsubmit"></div>
+                    <div>
+                        <input type="text" id="s" name="s"><input type="button" value="Search" id="searchsubmit">
+                    </div>
                 </form>
+                </div>
             </div>
           </div>
           <div id="right-col">
@@ -62,7 +65,7 @@
         src="http://platform.twitter.com/widgets.js"></script>
 <div class="entry">
 <p><strong>Update 3/2/2012</strong> If anyone out there is a tinkerer, they probably know that well enough is never enough. Since I wrote this all those months ago, I&rsquo;ve actually totally changed the brains behind this site to use an entirely different and, in my opinion, much cleaner approach involving <a href="http://hyde.github.com/">Hyde</a> and an S3 bucket. And that&rsquo;s about&nbsp;it.</p>
-<p>Back in January, I read <a href="http://www.nata2.org/2011/01/26/how-to-use-app-engine-to-host-static-sites-for-free/">this</a> and thought it was a pretty cool idea. For some reason, I just kinda filed it away and didn&rsquo;t really think about it until sometime in the early morning hours of October 22 when I got the urge to write about <a href="2010-census-leveraging-whats-already-been-done.html">this</a> but didn&rsquo;t really have anywhere to do it.  Add to that the fact that I my brain starts hurting when I start to see the long road of configuring and deploying a site, whatever the platform. I just wanted something that would kinda be there, look presentable out of the box, and not have anything to do with&nbsp;<span class="caps">PHP</span>. </p>
+<p>Back in January, I read <a href="http://www.nata2.org/2011/01/26/how-to-use-app-engine-to-host-static-sites-for-free/">this</a> and thought it was a pretty cool idea. For some reason, I just kinda filed it away and didn&rsquo;t really think about it until sometime in the early morning hours of October 22 when I got the urge to write about <a href="2010-census-leveraging-whats-already-been-done.html">this</a> but didn&rsquo;t really have anywhere to do it. Add to that the fact that I my brain starts hurting when I start to see the long road of configuring and deploying a site, whatever the platform. I just wanted something that would kinda be there, look presentable out of the box, and not have anything to do with&nbsp;<span class="caps">PHP</span>. </p>
 <p>What I came up with looks a little like&nbsp;this:</p>
 <ol>
 <li>WordPress stack running locally on a <a href="http://vagrantup.com/">Vagrant <span class="caps">VM</span></a> (<span class="caps">OK</span>, <span class="caps">OK</span>, so, there is a bit of&nbsp;<span class="caps">PHP</span>)</li>
@@ -102,16 +105,16 @@ static_dir: '/'
 <p>I suppose this is just the beginning. I&rsquo;m hoping this is a sustainable solution and Google doesn&rsquo;t catch on and start charging me cause it&rsquo;s pretty&nbsp;slick.</p></div>
 <div class="post-metadata alt">
     <p><strong>Tags: </strong>
-    <a class="small" href="/blog/tags/Google.html">
+    <a class="small" href="/tags/Google.html">
         Google
     </a>
-    <a class="small" href="/blog/tags/AppEngine.html">
+    <a class="small" href="/tags/AppEngine.html">
         AppEngine
     </a>
-    <a class="small" href="/blog/tags/WordPress.html">
+    <a class="small" href="/tags/WordPress.html">
         WordPress
     </a>
-    <a class="small" href="/blog/tags/Droplet.html">
+    <a class="small" href="/tags/Droplet.html">
         Droplet
     </a>
 </p>

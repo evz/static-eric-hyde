@@ -1,0 +1,150 @@
+---
+title: "Mapping tools 101: A few things I&rsquo;ve picked up"
+description: "A rundown a demo of some modern web based mapping tools"
+created: !!timestamp '2011-10-29 10:30:00'
+tags:
+    - Census
+    - Javascript 
+    - Maps 
+    - Python
+    - TileMill
+    - TileStache
+---
+
+{% mark excerpt %}
+
+My introduction to Python, and Django in particular, was a week-long project to setup, from scratch, a basic, working GeoDjango project. Thanks to some really [stellar documentation](https://docs.djangoproject.com/en/1.3/ref/contrib/gis/), which has actually improved quite a bit since back in the day (like, a year and a half ago or whatever), I was able to do it. But, quite frankly, that was only the beginning. When I showed off my little application around the office, it ended up being a full fledged project, which I&rsquo;m still tweaking to this day. This is an attempt to unravel some of what I&rsquo;ve picked up during that time, especially given all of the recent developments in the web based mapping sphere. This is by no means a comprehensive overview, but rather just a guy sharing how he does what he does.
+
+{% endmark %}
+**Map theory**
+Web based maps exist in a browser as layers. You&rsquo;ve usually got a street map layer that you can get from someplace like Google or, in my case, Cloudmade(http://cloudmade.com). This is pretty crucial as it gives the whole thing context. Street map tiles are generally built by rasterizing [OpenStreetMap](http://www.openstreetmap.org/) data with varying degrees of detail for different zoom levels (so, for instance, you don&rsquo;t see the alley that goes behind your apartment building until you zoom all the way in). Those images are chopped up into little squares and stuck on a server somewhere. On top of the street maps is generally where you&rsquo;ll put your data, either in the form of polygons or rasterized tiles (just like the street maps but maybe a bit more transparent so you can see the street maps). These layers get stitched together with a bit of intelligent client-side Javascript which, on the one side, grabs the street maps, and on the other side loads data from your application (either in the form of raw data or more tiles). I&rsquo;ll get more into the particulars of how that works in a bit, I just wanted to set the stage a bit so the next few sections have a bit of context.
+
+Instead of showing you a relatively complex (and not fully implemented) project, I&rsquo;ll go ahead and demonstrate a few things by building a rather silly application using some freely available [census boundary data](http://www.census.gov/cgi-bin/geo/shapefiles2010/main). If you&rsquo;d like to follow along, once I had the [basic GeoDjango stack](https://docs.djangoproject.com/en/1.3/ref/contrib/gis/install/) up and running, I downloaded California county boundaries and California census place boundaries and put them into [these models](https://gist.github.com/1324843#file_models.py). To make that simpler, I used [this script](https://gist.github.com/1324843#file_load_data.py) (based on the one from the [GeoDjango tutorial](https://docs.djangoproject.com/en/1.3/ref/contrib/gis/tutorial/)). I&rsquo;ve also placed all the code that I put together for this demo in a [Github repo](https://github.com/evz/demo).
+
+**Getting some basic data on the map**
+Within the context of the GeoDjango application we&rsquo;re building, the interaction between the server and client, in it&rsquo;s most basic form, can look something like this. First, the Django app&rsquo;s urls.py:
+
+<script src="https://gist.github.com/1324843.js?file=urls.py"></script>
+
+Next, the views:
+
+<script src="https://gist.github.com/1324843.js?file=views.py"></script>
+
+Now, the meaty parts: the client-side Javascript. As I mentioned above, this is where all the stitching happens. For this example, I&rsquo;m going to use some built in Django template tags and the [OpenLayers](http://openlayers.org) Javascript API to get the shapes where I want them with a bit of metadata attached. The snippet below shows you the javascript code from the template that&rsquo;s doing most of the work. It&rsquo;s inheriting from a template that puts a ``div`` with the ID of &ldquo;map&rdquo; on the page and also loads all the necessary external Javascript libraries. The same sort of approach would work for either of the views detailed above.</p>
+
+<script src="https://gist.github.com/1324843.js?file=openlayers-example.js"></script>
+
+If you ask me, that code is kinda clunky. It seems that OpenLayers has the most robust Javascript API allowing you to do everything from what I just demonstrated to allowing users to draw their one shapes on the map. Where this might be kinda fun and useful for some cases, I&rsquo;ve never really needed it. What I needed was a client-side Javascript library that was going to be fast, load quickly, work with most browsers and as a bonus maybe even on mobile devices. What I found was [Leaflet](http://leaflet.cloudmade.com).
+
+**Adding Leaflet and a bit more complexity**
+
+So, wow, you can load some county shapes on a map. Big deal. My kid can do that. What we want is something that is more interactive, and will maybe even load stuff dynamically as a user requests it. Wouldn&rsquo;t that be cool? Not only is this slightly easier to do with Leaflet (as opposed to OpenLayers), it&rsquo;s also going to give us an opportunity to flex a few GeoJSON muscles.
+
+First, let&rsquo;s build a Django view:
+
+<script src="https://gist.github.com/1324843.js?file=more-views.py"></script>
+
+A couple things to point out before moving on to the client-side.  You&rsquo;ll notice that there are two paths here: one for the initial request and one for loading the GeoJSON. This works by adding the bounding box into the context and returning that for use on the client side. On the client side, you load the street map tiles as usual but then the bounding box is used to zoom the map to fit in the browser widow. Once that loads, the client-side code fires a ``$.getJSON`` call which gets the GeoJSON from this same view. The handy thing about GeoDjango, is that it constructs that for you out of the box. Whenever you want to access that, you just append ``.geojson()`` to the end of your QuerySet and it&rsquo;ll make that available to you for each object within that QuerySet.
+
+The GeoJSON spec provides for a place to put information about the geometry called, predictably enough, &ldquo;properties&rdquo;. The GeoJSON that is produced by GeoDjango doesn&rsquo;t include that but, since it&rsquo;s pretty simple to just turn it into a Python dictionary by using the json module, you can add that in there manually and put whatever you want in there. The reasons for this become apparent when parsing this out on the client-side.
+
+The other thing to point out before moving on to the client side is that you can also quickly access the bounding box of any QuerySet by using the ``.extent()`` method. The one screwy thing about that is that the points are reversed. So, it&rsquo;s longitude, latitude instead of latitude, longitude (which is what Leaflet will want on the client-side). I chose to take care of that over there (instead of in the Python code) just because I find it to be a bit cleaner and easier.
+
+Here&rsquo;s the client-side code:
+
+<script src="https://gist.github.com/1324843.js?file=leaflet-example.js"></script>
+
+Quick rundown on what&rsquo;s join on there: when the DOM is ready, the base map gets loaded along with a little [spinner](http://fgnass.github.com/spin.js/) doo-hicky and a ``$.getJSON`` call is fired which grabs the GeoJSON from the view, parses it using the ``parse_map_data`` function which in turn adds a click event to each shape that, when fired, zooms the map to that object and pops up a little bubble with the County name in it.
+
+Now it&rsquo;s getting a bit more interesting. There&rsquo;s a bit more interactivity and we&rsquo;re giving the user some kind of information, however simple, about what they&rsquo;re looking at. The one thing we&rsquo;re not really doing here is styling the objects as they are coming across but that&rsquo;s a pretty trivial thing to do by adding more intelligence into the ``geojson.on('featureparse'...`` part up there. Take a look [over here](http://leaflet.cloudmade.com/reference.html#geojson) for more info on how to get that going.
+
+But, even though it&rsquo;s working pretty well at this stage, there is one big thing that is wrong with this approach and that is performance. We&rsquo;re loading a whole bunch of stuff into the DOM all at once and I know from personal and painful experience that there are certain browsers (*cough* IE *cough*) on the market that will be crushed, even by this relatively simple map. So, what to do? Well, I&rsquo;m glad you asked.
+
+**Flatter is better**
+
+Ever since I identified the map obsession I seem to have in common with the [News Applications] guys down at the Chicago Tribune, I&rsquo;ve followed what they produce pretty closely. The thing that really got my attention was a series of [blog posts](http://blog.apps.chicagotribune.com/2011/03/08/making-maps-1/) that they published in March of this year detailing how they put together a then recent series of maps and which were entirely as static resources from an S3 bucket. As I mentioned earlier, the scale that I was having to deal with in the applications I was putting together kept putting me in the awkward position of trying to explain why it was that IE couldn&rsquo;t load 1200 objects into the DOM without folding. If I could pull off the approach that the Chicago Tribune guys were taking, this would not only mean that I could sidestep the whole browser issue but I might even get a pretty cheap hosting solution out of it.
+
+Well, I didn&rsquo;t get everything that I wanted but I did get pretty close. What I came up with was sort of a hybrid solution using the tile layers that the TribApps guys talk about on their blog without losing the intelligence of the GeoDjango backend.
+
+**TileStache**
+
+The big caveat of taking a flatter approach to rendering maps is that there&rsquo;s a lot of processing that you have to do up front. To render out tiles for every zoom level for the entire continental United States could take weeks. This is because each time you zoom in you increase the number of tiles you need by a factor of 4 so by the time you get up to zoom level 22 or whatever, you&rsquo;re talking about billions of individual images that you&rsquo;ll need.
+
+This is where [TileStache](http://tilestache.org/) comes in very handy. What it does, in a nutshell, is very quickly renders the tiles on the fly and them caches them so that the next time a request comes in asking for them, they&rsquo;re already prepared. How, you ask? Well, it&rsquo;s pretty simple actually. But first we need to take a step back and look at how to prepare the type of file that TileStache needs for input.
+
+**TileMill**
+By far the best application for working with map tiles is [TileMill](http://mapbox.com/tilemill/) which is an open source tool by MapBox for taking geospatial data and turning it into pretty map tiles. For the purposes of this demo, I&rsquo;m not going to get too deep into the more advanced features but I encourage you to take a look. There are some pretty slick possibilities there.
+
+After you get it up and running and maybe kick the tires a bit to get familiar with what&rsquo;s going on there, you can either point TileMill at the PostgreSQL database that you created for your GeoDjango project or you can just point it at the shapefiles that you used to load data into that database. I&rsquo;m just gonna use the shapefiles because it&rsquo;s a little quicker and cleaner. Before you do that, however, you need to prepare the shapefiles a bit so that TileMill will load them without a problem. This is how I did that:
+
+
+<script src="https://gist.github.com/1324843.js?file=index-shp.sh"></script>
+
+If you grabbed the [Github repo](https://github.com/evz/demo) at the beginning, I&rsquo;ve already done that for those files so you can skip that part. If not, you&rsquo;ll need to have the GDAL libraries installed on whichever machine you run that command on.
+
+Again, I&rsquo;m not going to get too into the nuances of designing your tile layers. I&rsquo;m just going to stick with something very basic to demonstrate the principles here. This is the stylesheet I used for TileMill:
+
+<script src="https://gist.github.com/1324843.js?file=tilemill-counties.css"></script>
+
+Now comes the fun part getting the tiles to render in TileStache and getting them back on to our map.
+
+**Setup TileStache**
+
+One of the formats that TileStache can use to style up your tiles is called Mapnik XML which, handily enough, TileMill provides for any project you start. When you&rsquo;re looking at your project, just click the little wrench icon to the right of the breadcrumb menu at the top and then click &ldquo;Mapnik XML&rdquo; near the bottom of that dialog. This will generate an XML file and save it onto your local file system.
+
+Before we can put that into TileStache, there are a couple things you&rsquo;ll need to know about setting up TileStache and making sure those XML files will work. First, for the purposes of this demo, I setup a separate VM that is running my tilestache instance. This, in a nutshell, is how I did that from a base Ubuntu 10.04 box (can&rsquo;t remember why I chose that version but, hey):
+
+<script src="https://gist.github.com/1324843.js?file=tilestache-setup.sh"></script>
+
+The tricky part there is using the [Development Seed](http://developmentseed.org/) PPA to get an already built Mapnik2. Ubuntu is still on a older version by default. You&rsquo;ll need the newer version in order to get TileStache to be able to read the XML files that TileMill produces, since they use a newer spec. The requirements file that I included in the [Github repo](https://github.com/evz/demo) includes [Gunicorn](http://gunicorn.org/) to handle the WSGI stuff and the last line of that code above is actually how you get TileStache running under Gunicorn.
+
+The three parts that TileStache needs to start cranking out files are the Mapnik XML that we got from TileMill, the actual data source (in this sample it&rsquo;s just a shapefile) and a configuration file. This is the config file that I&rsquo;m going to use for the counties layer:</p>
+
+<script src="https://gist.github.com/2001692.js?file=tilestache-config.json"></script>
+
+For this example, I&rsquo;m using the simple on disk caching but there are a bunch of other things you can do with that. Needless to say, [read the docs](http://tilestache.org/doc/). The other thing you&rsquo;ll see there is that you have to point it at your Mapnik XML file. But before this will work, we have to clean it up so that it&rsquo;ll work.
+
+The first thing is to get rid of the background color, if you set one in TileMill. It&rsquo;s at the end of the first ``Map`` element in the file. The other thing to do is make sure that the XML file knows how to find your data source. There&rsquo;s a ``Parameter name="file"`` tag in the XML that you&rsquo;ll want to edit to point to where your shapefile is stored on the machine that is running TileStache. I&rsquo;ve included a configuration file and a rendered version of the Mapnik XML in the tilestache folder within the Github repo so you should be pretty much ready to go for the next part.
+
+**Putting tiles on the map**
+
+After all that, Leaflet actually makes it pretty easy to put the tiles on the map:
+
+<script src="https://gist.github.com/2001692.js?file=leaflet-tiles.js"></script>
+
+Predictably, the new tile layers are loaded as ``L.TileLayer``. I also prepared another layer in TileMill for the census places and added that into the TileStache config file so that I can load that layer here as well.
+
+This may seem like a step backwards but just bear with me. It&rsquo;s gonna get interesting here in a minute.
+
+**Getting back the data and more interactivity**
+
+Using the tile layers to draw the boundaries of the shapes has one huge advantage over using polygons: performance. All the browser really needs to know how to do is load a bunch of images which it does pretty well. But, since they are just images, we lose our interactivity. Just as a quick aside, there is a way to to add interactivity directly to the tile layers but since TileStache doesn&rsquo;t have that built in (yet), I&rsquo;m not gonna cover it here. Interested? [Check it out](http://mapbox.com/mbtiles-spec/) (the interesting part is the part on the UTFGrid).
+
+First off, let&rsquo;s add the ability to search this sucker. The simplest way to accomplish this is by leveraging [Google&rsquo;s GeoCoder API](http://code.google.com/apis/maps/documentation/geocoding/). If you&rsquo;ve never used it before, think of it as the brains behind the Google&rsquo;s map search, because that&rsquo;s what it is. Give it an address or a fragment of an address and it gives you back geographic info about it. Multiple matches? No problem, it gives you the opportunity to clarify. Here&rsquo;s how I implemented that in a Django view for the example project:
+
+<script src="https://gist.github.com/2001692.js?file=search-view.py"></script>
+
+So, quick rundown of what&rsquo;s going on here: First time the view gets hit, it just renders the template and adds the bounding box info back into the context so that we can set the zoom for the map. The next time (and subsequent times) it&rsquo;s hit with an Ajax request, it takes the ``search`` parameter from the querystring and sends it over to Google&rsquo;s Geocoder using the excellent [Python Requests](http://docs.python-requests.org/en/latest/index.html) library. When it gets the response back, it parses it, finds the bounding box of the area in question (whether it&rsquo;s a city or a zip code or whatever), then hits the GeoDjango database with this query ``.filter(mpoly__bboverlaps=bbox_poly)`` to find all the counties and places that fit within that bounding box (or, more precisely, overlap with that bounding box). There are a bunch of query filters that you can apply here that are pretty [verbosely documented](https://docs.djangoproject.com/en/1.3/ref/contrib/gis/geoquerysets/#spatial-lookups) in the GeoDjango documentation. Needless to say, I&rsquo;m intentionally casting a pretty wide net. Once it has all the matching geometries, this view then packages it up on a JSON object and returns it back to the client.
+
+Here&rsquo;s what&rsquo;s happening on the client side:
+
+<script src="https://gist.github.com/2001692.js?file=leaflet-tiles-inter.js"></script>
+
+Another quick rundown: All the normal stuff at the top to initialize the map, including the new tile layers that we made. The next little bit is using a [jQuery forms plugin](http://jquery.malsup.com/form/) to submit the search query from a form field on the template to the view and handle the response that comes back. When the response comes back from the view (which is the JSON object that I referenced earlier) it gets parsed by the ``parse_results`` function. If there is some need for clarity (basically if your search returns more than one hit), you get back a list of possibilities and by clicking on one, it resubmits the form and tries again. Once you&rsquo;ve only got one possibility, you get back the list of counties and places that match your query and by clicking on one, the map zooms to that area and puts a little popup over it with the place or county name in it.
+
+Still, besides a pretty decent performance boost, we&rsquo;re not to much farther than we were before. Now&rsquo;s the time to start bringing the data.
+
+**Add some data to your map**
+For this example, I&rsquo;m going to add some census data to the little popups using [an API](http://census.ire.org/) that was built by the [Investigative Reporters and Editors](http://www.ire.org/) organization in partnership with a bunch of other folks. Luckily for us, we can leverage it pretty easily on the client side. As a quick aside, there are tons of tools on the [census.ire.org](http://census.ire.org/) site for analyzing and sharing census data. Check it out if you&rsquo;re into that.
+
+Diving right in, here is the client side code that I added to the last example to get the total population of each area to show up in the little bubble along with the name of the place or county:
+
+<script src="https://gist.github.com/2001692.js?file=census-example.js"></script>
+
+All that I&rsquo;ve added here is a function that saves the census data about the search results into a global variable that is then used to populate the popup bubble when a user clicks to view the detail of a particular area. And, really, this is just scratching the surface of what&rsquo;s available through [that census API](http://census.ire.org). If you dig a bit deeper into that site, you&rsquo;ll see that every scrap of census data is available in the JSON response that you are getting.
+
+Taking a step back, I&rsquo;m hoping you&rsquo;re eyes are kind of getting wide and you&rsquo;re starting to see the potential here. In this example, I just used the ``geoid`` to get census data but if you don&rsquo;t have that and just have geospatial data, you can leverage something like the Chicago Tribune&rsquo;s [Boundary Service API](http://boundaries.tribapps.com/#api) to get those ids (and even the boundary data itself).
+
+**Conclusions?**
+
+The purpose of this post (and the accompanying presentation that I&rsquo;m going to give tonight at the [Chicago Djangonauts](http://www.facebook.com/event.php?eid=267220009989198) meeting) is to just demonstrate some of the tools that are out there and really just to get you thinking about what&rsquo;s possible. The samples here are by no means a working, production ready application but hopefully just something to get your mind going.

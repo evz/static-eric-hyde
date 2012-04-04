@@ -1,8 +1,20 @@
+!!python/unicode '2011/10/2010-census-getting-setup.html': [blog.j2, base.j2, analytics.j2]
 !!python/unicode '2011/10/2010-census-leveraging-whats-already-been-done.html': [
   blog.j2, base.j2, analytics.j2]
+!!python/unicode '2011/10/making-search-possible-on-a-static-site.html': [blog.j2,
+  base.j2, analytics.j2]
+!!python/unicode '2011/10/mapping-tools-101-a-few-things-ive-picked-up.html': [blog.j2,
+  base.j2, analytics.j2]
 !!python/unicode '2011/10/omg-free-hosting-an-homage-to-harper-reed.html': [blog.j2,
   base.j2, analytics.j2]
-!!python/unicode '2011/index.html': [listing.j2, macros.j2, base.j2, analytics.j2]
+!!python/unicode '2011/10/untitled.html': [blog.j2, base.j2, analytics.j2]
+!!python/unicode '2011/11/2010-census-a-pain-in-my-block.html': [blog.j2, base.j2,
+  analytics.j2]
+!!python/unicode '2011/index.html': [blog.j2, listing.j2, !!python/unicode '2011/10/mapping-tools-101-a-few-things-ive-picked-up.html',
+  !!python/unicode '2011/10/2010-census-getting-setup.html', analytics.j2, !!python/unicode '2011/10/omg-free-hosting-an-homage-to-harper-reed.html',
+  !!python/unicode '2011/10/2010-census-leveraging-whats-already-been-done.html',
+  base.j2, macros.j2, !!python/unicode '2011/10/making-search-possible-on-a-static-site.html']
+!!python/unicode '2011/meta.yaml': []
 !!python/unicode 'about-this-site.html': [base.j2, analytics.j2]
 !!python/unicode 'about.html': [base.j2, analytics.j2]
 !!python/unicode 'blog/angry-post.html': []
@@ -12,22 +24,46 @@
 !!python/unicode 'blog/index.html': [listing.j2, macros.j2, base.j2, analytics.j2]
 !!python/unicode 'blog/sad-post.html': []
 !!python/unicode 'blog/tags/AppEngine.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'blog/tags/Census.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'blog/tags/Django.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'blog/tags/Droplet.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'blog/tags/GIS.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'blog/tags/Google.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'blog/tags/Javascript.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'blog/tags/Maps.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'blog/tags/Python.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'blog/tags/WordPress.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'blog/tags/angry.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'blog/tags/happy.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'blog/tags/jQuery.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'blog/tags/sad.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'blog/tags/thoughts.html': [base.j2, tagged_posts.j2, analytics.j2]
-!!python/unicode 'index.html': [blog.j2, listing.j2, base.j2, analytics.j2, !!python/unicode '2011/10/2010-census-leveraging-whats-already-been-done.html',
-  !!python/unicode '2011/10/omg-free-hosting-an-homage-to-harper-reed.html', macros.j2]
+!!python/unicode 'index.html': [blog.j2, listing.j2, !!python/unicode '2011/10/mapping-tools-101-a-few-things-ive-picked-up.html',
+  !!python/unicode '2011/10/2010-census-getting-setup.html', analytics.j2, !!python/unicode '2011/10/omg-free-hosting-an-homage-to-harper-reed.html',
+  !!python/unicode '2011/10/2010-census-leveraging-whats-already-been-done.html',
+  base.j2, macros.j2, !!python/unicode '2011/10/making-search-possible-on-a-static-site.html']
 !!python/unicode 'media/css/original.css': []
 !!python/unicode 'media/css/site.css': []
 !!python/unicode 'media/css/style.css': []
 !!python/unicode 'media/css/syntax.css': []
 !!python/unicode 'media/js/libs/dd_belatedpng.js': []
 !!python/unicode 'media/js/libs/jquery-1.5.1.min.js': []
+!!python/unicode 'media/js/libs/meta.yaml': []
 !!python/unicode 'media/js/libs/modernizr-1.7.min.js': []
+!!python/unicode 'media/meta.yaml': []
 !!python/unicode 'media/sass/_framework.scss': []
 !!python/unicode 'media/sass/style.scss': []
 !!python/unicode 'portfolio/index.html': [base.j2, macros.j2, analytics.j2]
+!!python/unicode 'tags/AppEngine.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'tags/Census.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'tags/Django.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'tags/Droplet.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'tags/GIS.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'tags/Google.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'tags/Javascript.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'tags/Maps.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'tags/Python.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'tags/TileMill.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'tags/TileStache.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'tags/WordPress.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'tags/jQuery.html': [base.j2, tagged_posts.j2, analytics.j2]

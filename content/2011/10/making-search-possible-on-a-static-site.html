@@ -1,0 +1,37 @@
+---
+title: "Making search possible on a static site"
+description: "Parsing an RSS feed for to make searching static content possible"
+created: !!timestamp '2011-10-27 10:30:00'
+tags:
+    - AppEngine
+    - Javascript 
+    - jQuery 
+    - Python
+---
+
+**Update 3/8/2012** Feedparser docs are actually [available online again!]( http://packages.python.org/feedparser/)
+
+{% mark excerpt %}
+One of the challenges I identified early one when [setting up this site](omg-free-hosting-an-homage-to-harper-reed.html) was that it was going to be a bit tricky to get some kind of search tool working for it. When I Googled it, I was pretty excited to find [this tool](http://tapirgo.com/) but when I sat down yesterday to implement it, it was broke. And by broke, I mean it wasn&rsquo;t returning any results and the developers weren&rsquo;t responding to any attempts at communications. So, I figured, if they can parse my RSS feed and turn it into something that returns search results, so can I. What follows is how I managed to get that going.
+
+{% endmark %}
+**AppEngine, again**
+It seems like recently I&rsquo;ve found quite a few uses for AppEngine. And this is without even really having it on my radar before last week. Besides serving this site from it, a coworker and I put together a little email handler for a [Wufoo](http://wufoo.com) form on AppEngine earlier this week. So, when my dream of making this site only rely on external web services for interactivity fell apart at some point yesterday, I guess it seemed like a natural fit.
+
+Really, all that the search widget over there in the right sidebar does is do a jQuery ``$.getJson`` call to the AppEngine app which grabs my [RSS feed](http://feeds.feedburner.com/static-eric) from Feedburner, parses it, looks for the query string in the content of the feed, and then returns a JSONP reponse. Here&rsquo;s what that looks like on the AppEngine side:
+
+<script src="https://gist.github.com/2001451.js?file=searchapp.py"></script>
+
+Since the client is calling a Cross Domain resource here, the response needs to be a JSONP response in order for jQuery to be cool with it (hence wrapping the json in the callback there). The other really, really cool thing I found was [Feedparser](http://code.google.com/p/feedparser/). The project is very mature but, unfortunately, the docs were on a domain that was owned by [Mark Pilgrim](http://en.wikipedia.org/wiki/Mark_Pilgrim_%28software_developer%29) (he was a heavy contributor to the project, apparently) so when he performed his recent info-suicide, that domain went with him. They&rsquo;re putting docs up onto PyPi soon (at least that&rsquo;s what the chatter in their forums is saying)
+
+Anyways, it&rsquo;s pretty easy to use. Import the module, give it a URL (or a sting with XML in it) and whammo, you&rsquo;ve got a Python dictionary with all the stuff from the feed in it. Since the docs are temporarily gone, I can&rsquo;t really say what other types of feeds or XML formats it accepts but it worked for the one that I&rsquo;m generating from WordPress.
+
+One other thing about that code that you&rsquo;ll notice is that instead of doing the normal ``from google.appengine.ext import webapp`` I&rsquo;m doing ``import webapp2 as webapp`` and I&rsquo;m also able to do ``import json`` even though AppEngine is still on Python 2.5. This is because in my app.yaml, I told it to use Python 2.7:
+
+<script src="https://gist.github.com/2001451.js?file=app.yaml"></script>
+
+On the client-side, I&rsquo;m just taking the response and sticking it over in a div underneath the search form:
+
+<script src="https://gist.github.com/2001451.js?file=client-side.js"></script>
+
+So, I guess that&rsquo;s pretty much it. That&rsquo;s how you get get search working on a static site. It would be really cool to see [these guys](http://tapirgo.com/) get their act together but, I guess it was kinda fun to do it on my own as well.

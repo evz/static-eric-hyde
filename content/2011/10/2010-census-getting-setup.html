@@ -1,0 +1,25 @@
+---
+title: "2010 Census: Getting setup"
+description: "Leveraging existing tools to parse data from the 2010 census"
+created: !!timestamp '2011-10-24 10:30:00'
+tags:
+    - Census
+    - Django
+    - GIS
+    - Python
+    - Maps
+---
+
+{% mark excerpt %}
+After attending [this meetup](http://meetupchicago.hackshackers.com/events/36413602/?eventId=36413602&amp;action=detail) last week, I was pretty excited to get going on hacking census data for [my own purposes](2010-census-leveraging-whats-already-been-done.html). I had the day off on Thursday so I spent most of the day trying to get the [census.ire.org](http://census.ire.org/) source [code](https://github.com/ireapps/census) running in a local VM. Despite being one of those guys that&rsquo;s pretty good at following directions, I did run into a few problems (but, then again, I&rsquo;m not much of a sysadmin). In the spirit of maybe making someone&rsquo;s life easier, here&rsquo;s how I got the project going in a Ubuntu 11.04 [vagrant VM](http://vagrantup.com/).
+
+{% endmark %}
+**First, a minor divergence**
+
+The docs over in the [github repo](https://github.com/ireapps/census) follow standard Python development practices by first setting up a virtualenv into which all the code libraries for the project get installed thereby making it easy to compartmentalize what you&rsquo;re doing in one project from another. Try as I might, I was unable to make this work (I posted [an issue](https://github.com/ireapps/census/issues/137) in the repo, for those interested). There&rsquo;s probably an easy answer out there somewhere but I, for one, was unable to find it. Since I was already setting this up in it&rsquo;s own VM, I figured that made it compartmentalized enough for me so I went ahead and installed everything globally just so I could get the project up and running. So, without further ado, here&rsquo;s the short version of how I setup my VM.
+
+<script src="https://gist.github.com/2001300.js?file=envsetup.sh"></script>
+
+**What&rsquo;s next?**
+
+For me, that&rsquo;s more a strategy question that anything. I&rsquo;ve [written a bit](2010-census-leveraging-whats-already-been-done.html) about my motivations and what I hope to get out of it. In the couple days since then, I think I&rsquo;ve come up with a more specific approach which I&rsquo;ll be writing about once I have it laid out end to end (and get a few particulars cleared up). So, uh, once again, stay tuned.
