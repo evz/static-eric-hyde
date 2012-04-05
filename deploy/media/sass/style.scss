@@ -1,42 +1,41 @@
 body {margin: 0; padding: 0;}
 
 #header{
-/*  top: 25px; 
-  right: 0;*/
+  top: 25px; 
+  right: 0;
   padding: 10px;
-/*  position: fixed;*/
+  position: fixed;
   z-index: 9999;
-  background-color: #000;
 }
 
 #wrapper {
     padding: 115px 0 0 0; 
     margin: 0; 
-    width: 1140px;
+    width: 1000px;
 }
 
 #left-col {
-/*  position: fixed;*/
+	position: fixed;
 	float: left;
 	padding: 0 10px 0 0; margin: 0;
-	width: 300px;
-	height: 75%; 
-/*  min-height: 600px;*/
+	width: 250px; min-width: 250px;
+	height: 75%; min-height: 600px;
 }
 
 #right-col {
 	position: relative;
-	float: left;
-	width: 750px;
+	left: 265px;
 	min-height: 800px;
 	padding-left: 0;
 }
 
 #footer {
-    text-align: center;
-    clear: both;
-    position: relative;
-    padding: 5px 0 30px 0;
+	text-align: center;
+	width: 750px;
+	clear: both;
+	position: relative;
+	left: 265px;
+	padding: 5px 0 30px 0;
 }
 
 #left-col {border-right: 1px solid #aeaeae;}
@@ -115,29 +114,33 @@ pre {
 
 /* headers */
 h1, h2 {
-    font-family: "ff-enzo-web-1", "ff-enzo-web-2", sans-serif;
+    font-family: ff-enzo-web,sans-serif;
 }
 
 #blog-title {
     font-weight: 700;
 	font-size: 2em;
 	margin: 0;
+	padding: 5px 15px;
+	display: inline;
+	vertical-align: middle;
+	background-color: black;
 }
 
 .entry h1,
 .posttitle
-{font-size: 28px; line-height: 28px} /* roughly 28px; */
+{font-size: 2em; line-height: 1.5em} /* roughly 28px; */
 
-.entry h2 {font-size: 26px; line-height: 26px} /* roughly 26px */
+.entry h2 {font-size: 1.857em; line-height: 1.5em} /* roughly 26px */
 
-.entry h3 {font-size: 24px; line-height: 24px} /* roughly 24px */
-.widgettitle {font-size: 20px; padding: 0 0 5px 0; margin: 0;} /* 20px */
+.entry h3 {font-size: 1.714em; line-height: 1.5em} /* roughly 24px */
+.widgettitle {font-size: 1.25em; padding: 0 0 5px 0; margin: 0;} /* 20px */
 
-.entry h4 {font-size: 20px; line-height: 20px} /* roughly 20px */
+.entry h4 {font-size: 1.429em; line-height: 1.5em} /* roughly 20px */
 
-.entry h5 {font-size: 16px; line-height: 16px} /* roughly 16px */
+.entry h5 {font-size: 1.142em; line-height: 1.5em} /* roughly 16px */
 
-.entry h6 {font-size: 14px; line-height: 14px} /* 14px */
+.entry h6 {font-size: 1em; line-height: 1.5em} /* 14px */
 
 
 /* Sidebar Items */
@@ -244,7 +247,10 @@ h1, h2 {
 
 .children, .sub-menu {margin: 0; padding: 0 0 0 15px;}
 
- /* Created so widgets could drop down on touch */
+.widgettitle + ul,
+.widgettitle + form,
+.widgettitle + div 
+{display: none;} /* Created so widgets could drop down on touch */
 
 .plus {padding-right: 18px;	background: url('../images/plus.png') right 40% no-repeat;}
 
@@ -274,7 +280,6 @@ ol li, #sidebar ol {list-style: decimal outside;} /* I don't quite know when num
 	padding: 0;
 	margin: 0;
 	width: 250px;
-	float: right;
 }
 
 #s {
@@ -296,27 +301,4 @@ ol li, #sidebar ol {list-style: decimal outside;} /* I don't quite know when num
 	height: 20px;
 }
 
-/** Media Queries **/
-
-@media screen and (max-width: 1100px) {
-    #wrapper {width:94%;}
-    #left-col {width:30%;}
-    #right-col {width:65%;}
-    h1#blog-title, h1.posttitle {font-size:24px;}
-}
-
-@media screen and (max-width: 700px){
-    #wrapper { width: auto; float: none; padding: 0;}
-    #left-col { 
-        width: auto; 
-        float: none; 
-        text-align: left; 
-        border-right: none; 
-        border-bottom: 1px solid #aeaeae;
-        padding: 0;
-    }
-    .page_item {text-align: left;}
-    #menu ul {margin: 0; padding: 0 10px}
-    #right-col {width: auto; float: none; margin-top: 15px;}
-    #searchform {float: none}
-}
+#header #searchform {float: right;} /* Header Search Form */

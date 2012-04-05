@@ -1,0 +1,131 @@
+<!doctype html>
+<!-- https://github.com/paulirish/html5-boilerplate/blob/master/index.html -->
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html lang="en" class="no-js ie8"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--> <html lang="en"> <!--<![endif]-->
+<head>
+    <meta charset="">
+  <meta http-equiv="X-UA-Compatible" content="">
+  <title>Making search possible on a static site</title>
+  <meta name="description" content="Parsing an RSS feed for to make searching static content possible">
+  <meta name="author" content="Eric van Zanten">
+  <meta name="viewport" content="">
+
+    <!-- Place favicon.ico & apple-touch-icon.png
+        in the root of your domain and delete these references -->
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+    <link rel="stylesheet" href="/media/css/style.css">
+  
+    <!-- All JavaScript at the bottom, except for Modernizr which
+        enables HTML5 elements & feature detects -->
+    <script src="/media/js/libs/modernizr-1.7.min.js"></script>
+    <!--[if lt IE 9]>
+    	<script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+    <![endif]-->
+    </head>
+<body id="making-search-possible-on-a-static-site">
+                                                                                      <section id="wrapper" class="content">
+          <div id="left-col">
+              <header id="header" class="banner clearfix">
+              <h1 id="blog-title"><a href="/">Eric van Zanten - Statically</a></h1>
+                <h2 class="breadcrumb"><!-- Figure out breadcrumbs--></h2>              </header>
+                        <div id="menu">
+                <ul>
+                    <li class="page_item"><a title="About this site" href="/about-this-site.html">About this site</a></li>
+                </ul>
+            </div>
+                        <div id="sidebar">
+                <div id="feed-container">
+                    <p><a id="feed_link" href="http://feeds.feedburner.com/static-eric">Subscribe to the RSS Feed</a></p>
+                </div>
+                <div>
+                <form id="searchform">
+                    <div>
+                        <input type="text" id="s" name="s"><input type="button" value="Search" id="searchsubmit">
+                    </div>
+                </form>
+                </div>
+            </div>
+          </div>
+          <div id="right-col">
+              <article class="post">
+<h1 class="posttitle">Making search possible on a static site</h1>
+<time class="post-author" datetime="2011-10-27">
+    Posted: Thu, 27 Oct 2011
+</time>
+<a href="http://twitter.com/share"
+    class="twitter-share-button"
+    data-count="horizontal"
+    data-via="evanzanten">Tweet</a>
+    <script type="text/javascript"
+        src="http://platform.twitter.com/widgets.js"></script>
+<div class="entry">
+<p><strong>Update 3/8/2012</strong> Feedparser docs are actually <a href="http://packages.python.org/feedparser/">available online&nbsp;again!</a></p>
+<p>One of the challenges I identified early one when <a href="omg-free-hosting-an-homage-to-harper-reed.html">setting up this site</a> was that it was going to be a bit tricky to get some kind of search tool working for it. When I Googled it, I was pretty excited to find <a href="http://tapirgo.com/">this tool</a> but when I sat down yesterday to implement it, it was broke. And by broke, I mean it wasn&rsquo;t returning any results and the developers weren&rsquo;t responding to any attempts at communications. So, I figured, if they can parse my <span class="caps">RSS</span> feed and turn it into something that returns search results, so can I. What follows is how I managed to get that&nbsp;going.</p>
+<p><strong>AppEngine, again</strong>
+It seems like recently I&rsquo;ve found quite a few uses for AppEngine. And this is without even really having it on my radar before last week. Besides serving this site from it, a coworker and I put together a little email handler for a <a href="http://wufoo.com">Wufoo</a> form on AppEngine earlier this week. So, when my dream of making this site only rely on external web services for interactivity fell apart at some point yesterday, I guess it seemed like a natural&nbsp;fit.</p>
+<p>Really, all that the search widget over there in the right sidebar does is do a jQuery <code>$.getJson</code> call to the AppEngine app which grabs my <a href="http://feeds.feedburner.com/static-eric"><span class="caps">RSS</span> feed</a> from Feedburner, parses it, looks for the query string in the content of the feed, and then returns a <span class="caps">JSONP</span> reponse. Here&rsquo;s what that looks like on the AppEngine&nbsp;side:</p>
+<script src="https://gist.github.com/2001451.js?file=searchapp.py"></script>
+
+<p>Since the client is calling a Cross Domain resource here, the response needs to be a <span class="caps">JSONP</span> response in order for jQuery to be cool with it (hence wrapping the json in the callback there). The other really, really cool thing I found was <a href="http://code.google.com/p/feedparser/">Feedparser</a>. The project is very mature but, unfortunately, the docs were on a domain that was owned by <a href="http://en.wikipedia.org/wiki/Mark_Pilgrim_%28software_developer%29">Mark Pilgrim</a> (he was a heavy contributor to the project, apparently) so when he performed his recent info-suicide, that domain went with him. They&rsquo;re putting docs up onto PyPi soon (at least that&rsquo;s what the chatter in their forums is&nbsp;saying)</p>
+<p>Anyways, it&rsquo;s pretty easy to use. Import the module, give it a <span class="caps">URL</span> (or a sting with <span class="caps">XML</span> in it) and whammo, you&rsquo;ve got a Python dictionary with all the stuff from the feed in it. Since the docs are temporarily gone, I can&rsquo;t really say what other types of feeds or <span class="caps">XML</span> formats it accepts but it worked for the one that I&rsquo;m generating from&nbsp;WordPress.</p>
+<p>One other thing about that code that you&rsquo;ll notice is that instead of doing the normal <code>from google.appengine.ext import webapp</code> I&rsquo;m doing <code>import webapp2 as webapp</code> and I&rsquo;m also able to do <code>import json</code> even though AppEngine is still on Python 2.5. This is because in my app.yaml, I told it to use Python&nbsp;2.7:</p>
+<script src="https://gist.github.com/2001451.js?file=app.yaml"></script>
+
+<p>On the client-side, I&rsquo;m just taking the response and sticking it over in a div underneath the search&nbsp;form:</p>
+<script src="https://gist.github.com/2001451.js?file=client-side.js"></script>
+
+<p>So, I guess that&rsquo;s pretty much it. That&rsquo;s how you get get search working on a static site. It would be really cool to see <a href="http://tapirgo.com/">these guys</a> get their act together but, I guess it was kinda fun to do it on my own as&nbsp;well.</p></div>
+<div class="post-metadata alt">
+    <p><strong>Tags: </strong>
+    <a class="small" href="/tags/AppEngine.html">
+        AppEngine
+    </a>
+    <a class="small" href="/tags/Javascript.html">
+        Javascript
+    </a>
+    <a class="small" href="/tags/jQuery.html">
+        jQuery
+    </a>
+    <a class="small" href="/tags/Python.html">
+        Python
+    </a>
+</p>
+</div>
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = 'static-eric';
+        var disqus_identifier = 'Making search possible on a static site';
+        var disqus_url = 'http://static-eric.com/2011/10/making-search-possible-on-a-static-site.html';
+        var disqus_developer = 1;
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+</article>          </div>
+          <footer id="footer">
+              Copyright &copy; 2012 Eric van Zanten,  Powered by <a href="http://ringce.com/hyde">hyde</a>.
+          </footer>
+                  <!-- Javascript at the bottom for fast page loading -->
+    <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if necessary -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
+  <script>window.jQuery || document.write('<script src="js/libs/jquery-1.5.1.min.js">\x3C/script>')</script>
+  
+    
+
+  <!--[if lt IE 7 ]>
+    <script src="js/libs/dd_belatedpng.js"></script>
+    <script>DD_belatedPNG.fix('img, .png_bg'); // Fix any <img> or .png_bg bg-images. Also, please read goo.gl/mZiyb </script>
+  <![endif]-->
+
+      
+  </body>
+</html>

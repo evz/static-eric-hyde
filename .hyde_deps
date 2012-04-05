@@ -1,6 +1,7 @@
 !!python/unicode '2011/10/2010-census-getting-setup.html': [blog.j2, base.j2, analytics.j2]
 !!python/unicode '2011/10/2010-census-leveraging-whats-already-been-done.html': [
   blog.j2, base.j2, analytics.j2]
+!!python/unicode '2011/10/index.html': [listing.j2, macros.j2, base.j2, analytics.j2]
 !!python/unicode '2011/10/making-search-possible-on-a-static-site.html': [blog.j2,
   base.j2, analytics.j2]
 !!python/unicode '2011/10/mapping-tools-101-a-few-things-ive-picked-up.html': [blog.j2,
@@ -10,10 +11,8 @@
 !!python/unicode '2011/10/untitled.html': [blog.j2, base.j2, analytics.j2]
 !!python/unicode '2011/11/2010-census-a-pain-in-my-block.html': [blog.j2, base.j2,
   analytics.j2]
-!!python/unicode '2011/index.html': [blog.j2, listing.j2, !!python/unicode '2011/10/mapping-tools-101-a-few-things-ive-picked-up.html',
-  !!python/unicode '2011/10/2010-census-getting-setup.html', analytics.j2, !!python/unicode '2011/10/omg-free-hosting-an-homage-to-harper-reed.html',
-  !!python/unicode '2011/10/2010-census-leveraging-whats-already-been-done.html',
-  base.j2, macros.j2, !!python/unicode '2011/10/making-search-possible-on-a-static-site.html']
+!!python/unicode '2011/11/index.html': [listing.j2, macros.j2, base.j2, analytics.j2]
+!!python/unicode '2011/index.html': [listing.j2, macros.j2, base.j2, analytics.j2]
 !!python/unicode '2011/meta.yaml': []
 !!python/unicode 'about-this-site.html': [base.j2, analytics.j2]
 !!python/unicode 'about.html': [base.j2, analytics.j2]
@@ -38,10 +37,7 @@
 !!python/unicode 'blog/tags/jQuery.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'blog/tags/sad.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'blog/tags/thoughts.html': [base.j2, tagged_posts.j2, analytics.j2]
-!!python/unicode 'index.html': [blog.j2, listing.j2, !!python/unicode '2011/10/mapping-tools-101-a-few-things-ive-picked-up.html',
-  !!python/unicode '2011/10/2010-census-getting-setup.html', analytics.j2, !!python/unicode '2011/10/omg-free-hosting-an-homage-to-harper-reed.html',
-  !!python/unicode '2011/10/2010-census-leveraging-whats-already-been-done.html',
-  base.j2, macros.j2, !!python/unicode '2011/10/making-search-possible-on-a-static-site.html']
+!!python/unicode 'index.html': [listing.j2, macros.j2, base.j2, analytics.j2]
 !!python/unicode 'media/css/original.css': []
 !!python/unicode 'media/css/site.css': []
 !!python/unicode 'media/css/style.css': []

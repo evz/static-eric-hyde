@@ -23,7 +23,7 @@ I work for the [Bah&aacute;&rsquo;&iacute; Faith](http://www.bahai.us). The admi
 
 **Re-purposing guts of the IRE app**
 
-Once I got the [census.ire.org project](https://github.com/ireapps/census) setup I kinda sat back at said to myself, &ldquo;uh, OK, now what&ellip;&rdquo;. My first approach was actually to forget about all the juicy goodness in there and try to just get what I needed from the API that they offer. Problem is, block level data is not available through the API (which I suppose is understandable given that there are like, 8,000,000 census blocks in the U.S.).
+Once I got the [census.ire.org project](https://github.com/ireapps/census) setup I kinda sat back at said to myself, &ldquo;uh, OK, now what&hellip;&rdquo;. My first approach was actually to forget about all the juicy goodness in there and try to just get what I needed from the API that they offer. Problem is, block level data is not available through the API (which I suppose is understandable given that there are like, 8,000,000 census blocks in the U.S.).
 
 Since no one else had the data, it was starting to look like I would have to build it myself (\*gulp\*). In reading the docs for the IRE Django app, the parts that intrigued me the most were the parts that actually fetched census data and loaded it someplace. The someplace, in their case, was a MongoDB database which, at the end of the day, got dumped out and turned into flat JSONP files which were then uploaded to an S3 bucket so that schmoes like me could access it through the API. Problem with that, at least for me, was that I needed some way of comparing my arbitrary shapes with the census block shapes. What I needed, in a nutshell, was a [PostGIS](http://postgis.refractions.net/) database with both my arbitrary shapes and the census blocks. Luck for me, [I&rsquo;ve done that before](/2011/10/mapping-tools-101-a-few-things-ive-picked-up.html). 
 
@@ -46,3 +46,66 @@ One word of caution before doing any of this stuff: working with block level dat
 **Load GIS data**
 
 This was actually remarkably simple thanks to the [GeoDjango LayerMapping tool](https://docs.djangoproject.com/en/1.3/ref/contrib/gis/layermapping/ "GeoDjango LayerMapping"). All it took was getting the data from [here](http://www2.census.gov/geo/tiger/TIGER2010/TABBLOCK/2010/ "Block level GIS data") and stuffing it into a Django model. Here&rsquo;s the model I went with:
+
+<script src="https://gist.github.com/2305477.js?file=models.py"></script>
+
+The ``locality`` field is a ``ForeignKey`` to the model where I store the Bah&aacute;&rsquo;&iacute; localities (my arbitrary geographies). The ``xref`` field is a ForeignKey to a cross reference table that, at least while it&rsquo;s loading, gives us the ability to relate a place on the surface of the earth to the number of people that live there. Other than that, it&rsquo;s pretty much a one-to-one mapping of the GIS data that you get from the Census Bureau. Here&rsquo;s my LayerMapping script:
+
+<script src="https://gist.github.com/2305477.js?file=LayerMapping.py"></script>
+
+As I mentioned above, this is something that can take an insane amount of time to complete. If you&rsquo;re having trouble getting it to finish the whole job, the LayerMapping tool does support passing a ``fid_range`` keyword argument into the ``.save()`` method with a tuple containing the indexes of the first and last features you want to load. That gives you a way of resuming should something get frozen or die on you. On a test run, I was able to load all 450,000+ shapes for the state of Illinois into my Ubuntu VMs with relatively limited resources (512MB RAM for app server and 1024MB RAM for db server) on my Intel i5 MacBook Pro. It finished. Eventually. It helps if you don&rsquo;t watch.
+
+**Fetching census data**
+
+This part is basically grabs the raw data from the Census Bureau, does some basic cleanup and generates the table headers (using [this script](https://github.com/ireapps/census/blob/master/dataprocessing/make_sf_data_2010_headers.py "Making 2010 census table headers") from IRE) so that the next step is easier. I pretty much directly ripped this part off from [this script](https://github.com/ireapps/census/blob/master/dataprocessing/fetch_sf_data_2010.sh "Fetch 2010 data script") from within the IRE project. Hey, they told me to [steal it](http://blog.apps.chicagotribune.com/2011/10/19/steal-this-code-presentation-to-hackshackers-opengovchicago/ "Steal this code: News Apps Blog"). One thing I want to point out from within that file is the last line:
+
+``in2csv -e &quot;latin-1&quot; -f fixed -s ${DATAPROCESSING_DIR}/census2010_geo_schema.csv ${STATE_NAME_ABBR}geo2010.sf1 &gt; ${STATE_NAME_ABBR}geo2010.csv``
+
+This leverages the ever useful [csvkit](https://github.com/onyxfish/csvkit "CSVKit on Github") to take the ``census2010_geo_schema.csv`` file and add it as a header to the info about the actual geographic areas that are part of the raw census data you downloaded in the first part of the script. This becomes kind of the lynchpin when we get to the part where we&rsquo;re loading the census tables into Django models.
+
+**Make cross reference table**
+
+The Census Bureau provides the census data in what I consider to be relatively cryptic form. I suppose it&rsquo;s all in the interest of making it portable and platform agnostic but for me it was somewhat of a headache to make heads or tails of what was going on there. Again, if it weren&rsquo;t for the work put in on the IRE project, I would be nowhere.
+
+The first part of the headache was trying to relate the geospatial data that we&rsquo;ve already loaded to the census tables that we&rsquo;re about to load so that when you query a place, you know how many people live there. The way this was accomplished by the IRE project was by building sort of a throw away cross reference relation that both the data about a place and the census data about that place have in common. Which is trickier than it sounds for reasons that are totally unknown to me. Since MongoDB is a non-relational database, the process that the IRE project had to go through to make the relation involved making a key that was stored when you loaded the info about a place and then could refer to later when loading the census data about that that place. My approach was to build a table that each geography would have a ForeignKey to and then looking up that geography using that relation when I loaded the census data. It has pretty much the same effect as the IRE approach only it&rsquo;s relational rather than non-relational. Anyways, here&rsquo;s the code I used to make the cross reference table:
+
+<script src="https://gist.github.com/2305477.js?file=xref.py"></script>
+
+The crux of what&rsquo;s going on here is that it&rsquo;s taking the ``[state abbrv]geo2010.csv`` file that you created in step two, going through it row by row, creating a cross reference based upon the ``FILEID``, (which is basically the same for all of these since we&rsquo;re just using the [census summary file](http://www2.census.gov/census_2010/04-Summary_File_1/ "Census Data Summary File - raw data")) the ``STUSAB`` (which is a state level identifier) and the ``LOGRECNO`` which is basically an index number for the entry in question. We&rsquo;re then associating that with a particular census block based upon it&rsquo;s ``geoid``. That&rsquo;s basically a concatenation of the various [FIPS](http://en.wikipedia.org/wiki/Federal_Information_Processing_Standard "FIPS on Wikipedia") codes of the areas that contain that block plus the block number.
+
+One thing to note is that this script uses two external modules for some of it&rsquo;s functionality ``config`` and ``utils``. In my implementation, these are pretty much straight copies of [this](https://github.com/ireapps/census/blob/master/dataprocessing/config.py "IRE dataprocessing config file") and [this](https://github.com/ireapps/census/blob/master/dataprocessing/utils.py "IRE dataprocessing utils file"), respectively. I&rsquo;m not using everything in there since some of it has to do with the MongoDB parts.
+
+The part that makes a huge difference (and took me a fair bit of time to figure out) was to enable the block ``SUMLEV`` in the ``config`` file (this is what that ``if row_dict['SUMLEV'] not in config.SUMLEVS`` bit up there is all about). When you get the code from the IRE Github repo, it&rsquo;s not turned on by default (which is understandable). To do that, you just need to add it to ``SUMLEVS`` list on line 16 of the ``config`` file. For good measure, I also turned all the other ones off so I wouldn&rsquo;t be loading data that I wasn&rsquo;t going to be using.
+
+**Actually loading the census counts**
+
+Now that we&rsquo;ve made it possible to cross reference the census data with the geospatial data, let&rsquo;s load it up. Just so you know what we&rsquo;re working with, the SF1 (Summary File 1) data that we&rsquo;re loading here is broken down into 300+ tables which are divided amongst the 47 files we downloaded in step two. You can see the extensive (and rather nitpicky) nature of what that looks like in the census.ire.org app ([here&rsquo;s Chicago](http://census.ire.org/data/1714000.html "Chicago census data")). Since I&rsquo;m really only after 14 of these tables, I only built models to house 14 of them. Here&rsquo;s a sample (putting the whole thing here would just be silly):
+
+<script src="https://gist.github.com/2305477.js?file=pop_table.py"></script>
+
+The script used to load data into these is, again, based heavily upon what was already in the IRE project, just with the MongoDB parts taken out and the Django ORM/PostgreSQL/PostGIS parts put in. Here&rsquo;s what that looks like:
+
+<script src="https://gist.github.com/2305477.js?file=load_pop.py"></script>
+
+Quick rundown of the action here: we&rsquo;re getting a census table file (one of the 47 created in step 2) as a command line argument, and associating each row with a ``CensusBlock`` object based upon that ever handy cross reference table that we created earlier. The ``utils.parse_table_from_key(k)`` part is, again, referencing a function from the ``utils`` module that uses a regex to parse which census table the row being looked at contains data from based upon the pattern that is present in the row. Since I&rsquo;m only interested in 14 of the tables, I&rsquo;m only actually loading the data that is from those tables (hence the ``if k not in GET_CENSUS_TABLE.keys():`` part. After that, it&rsquo;s just passing the geo_id and the table values into the Django model (which is looked up in the ``GET_CENSUS_TABLE`` dict) as keyword arguments. By the way, that&rsquo;s my new favorite Python shortcut: ``o = m(**v)``.
+
+**The final relation**
+The final step here is to relate my arbitrary geographies with the census blocks they contain. I chose to do this by creating a ``ForeignKey`` from the ``CensusBlock`` object to the ``Locality`` object which contains it. I&rsquo;m still tweaking the actual queries that I&rsquo;m going to run in this stage but, for the purposes of a proof of concept, it&rsquo;s pretty solid. Here&rsquo;s my script for this last stage:
+
+<script src="https://gist.github.com/2305477.js?file=rel_xref.py"></script>
+
+I&rsquo;m actually trying to catch the census blocks associated with a particular area in three, ever widening, passes because the first time I tried this, just using the ``CensusBlock.objects.filter(mpoly__coveredby=loc.mpoly)`` filter, I ended up with a bunch of ``CensusBlock`` objects that weren&rsquo;t associated with any ``Locality`` objects. It&rsquo;s still a little messy but, just to show you it can actually be done, here&rsquo;s a screen shot showing a side-by-side comparison of what our Washington, D.C. ``Locality`` boundaries (which in this case correspond precisely with the actual boundaries of Washington, D.C.) look like next to all the census blocks that make it up:
+
+![Screen shot showing Washington D.C. built out of a Baha'i Locality compared to the same area made out of census blocks](/media/images/side-by-side-dc-1024x687.jpg "side-by-side-dc")
+
+**Wrapping it up**
+
+After I had my 5 scripts together, I made another script that basically takes a state name as command line argument and executes all the other scripts in order. It also handles downloading and unpacking the data:
+
+<script src="https://gist.github.com/2305477.js?file=batch_loader.sh"></script>
+
+So, really all you have to do is execute that and wait. And wait. It takes a really long time. Maybe go take in a movie. Or a movie marathon. Watch all 5 seasons of [The Wire](http://en.wikipedia.org/wiki/The_wire "The Wireon Wikipedia"). You get the idea&hellip;.
+
+**In all practicality&hellip;**
+
+Getting this far was relatively simple, given the amount of work that was already done for me by the wonderful IRE project. The next stage is going to be kind of where the rubber hits the road in terms of usability. I don&rsquo;t really want to have to run through this process on every state more than once so I&rsquo;m thinking I&rsquo;ll probably just serialize the parts I need and store them in an S3 bucket where I can grab it when I need it. But that&rsquo;s a project for later&hellip;
