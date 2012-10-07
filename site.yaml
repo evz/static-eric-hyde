@@ -34,3 +34,17 @@ tagger:
             archive_extension: html
             meta:
                 listable: false
+
+publisher:
+    s3:
+        type: pub.s3.S3
+        key:
+        secret:
+        bucket: www.static-eric.com
+        redirects:
+            - /2011/10/22/omg-free-hosting-an-homage-to-harper-reed/index.html => /2011/10/omg-free-hosting-an-homage-to-harper-reed.html
+            - /2011/10/23/2010-census-leveraging-whats-already-been-done/index.html => /2011/10/2010-census-leveraging-whats-already-been-done.html
+            - /2011/10/24/2010-census-getting-setup/index.html => /2011/10/2010-census-getting-setup.html
+            - /2011/10/27/making-search-possible-on-a-static-site/index.html => /2011/10/making-search-possible-on-a-static-site.html
+            - /2011/10/29/mapping-tools-101-a-few-things-ive-picked-up/index.html => /2011/10/mapping-tools-101-a-few-things-ive-picked-up.html
+            - /2011/11/13/2010-census-a-pain-in-my-block/index.html => /2011/11/2010-census-a-pain-in-my-block.html

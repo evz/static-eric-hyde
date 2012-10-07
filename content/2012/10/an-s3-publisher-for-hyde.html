@@ -1,0 +1,23 @@
+---
+title: An S3 publisher for Hyde
+description: Setting up a publisher extension for the Python static site generator, Hyde
+created: !!timestamp '2012-10-07 16:30:00'
+tags:
+    - Hyde
+    - Python
+    - S3
+    - AWS
+---
+{% mark excerpt %}
+
+So, this morning I finished what I started working on when I had a few spare moments at this year’s PyCon. Namely, take this site, convert it to use something that is an actual static site generator (preserving all the functions that it had before) and host it on S3. 
+
+{% endmark %} 
+
+Because I wanted to remove any trace of this site once being constructed in Wordpress ([as it once was](/2011/10/omg-free-hosting-an-homage-to-harper-reed.html)), one of my goals was to implement the slightly simplified path structure you see above in your browser. The main problem with that was that I would need to implement some sort of mechanism to properly handle redirects or I would lose page ranking, etc. So, when AWS announced last week that they had implemented [a way to do 301 redirects on S3](http://docs.amazonwebservices.com/AmazonS3/latest/dev/how-to-page-redirect.html), the final piece that I needed to make the shift happen was in place. Or, to be more accurate, the final excuse that I had was rendered stupid. 
+
+The source code for this site is [over here](https://github.com/evz/static-eric-hyde) on github and there’s really nothing remarkable there beyond the basic Hyde setup. The only thing I really added, and I why I thought I’d hammer out this post, was to write a custom publisher for Hyde that takes my site and pushes it up into the S3 bucket I’ve setup for this site. It took a bit of code spelunking, but I did find out that Hyde has a pretty decent extension framework to allow you to write your own publisher. The scant documentation that they have is [here](http://hyde.github.com/commands.html) (under “The publish command”) but surprisingly, it wasn’t too difficult to figure out. All it took was subclassing the ``Publisher`` class in ``hyde.publisher`` and overriding the ``initialize`` and ``publish`` methods. Here’s a gist that shows how that might be done: 
+
+<script src="https://gist.github.com/3849704.js?file=s3.py"></script>
+
+One tricky thing that took a few minutes to figure out was that part about the redirects. Basically what I’ve done is to refine a list in my site.yaml that takes where the redirect is from and where it needs to go in this form ``/2011/10/22/omg-free-hosting-an-homage-to-harper-reed/index.html => /2011/10/omg-free-hosting-an-homage-to-harper-reed.html``. The publisher just parses that out, then sets the ``website-redirect-location`` metadata on the objects as needed. And, uh, that’s about it. Feel free to fork/copy/plain-old steal. 

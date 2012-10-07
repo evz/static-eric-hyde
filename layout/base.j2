@@ -48,9 +48,7 @@
               {%- endblock %}
               </header>
             {% block nav %}
-            <ul>
-                <li class="page_item"><a title="About this site" href="/about-this-site.html">About this site</a></li>
-            </ul>
+            <p><a title="About this site" href="/about-this-site.html">About this site</a></p>
             {% endblock nav %}
             <p><a id="feed_link" href="http://feeds.feedburner.com/static-eric">Subscribe to the RSS Feed</a></p>
             <div class="row">
@@ -87,6 +85,8 @@
   <script>window.jQuery || document.write('<script src="/media/js/libs/jquery-1.7.2.min.js">\x3C/script>')</script>
   {% endblock jquery %}
     <script src="{{ media_url('js/search.js') }}"></script>
+    <script src="{{ media_url('js/libs/spin.min.js') }}"></script>
+    <script src="{{ media_url('js/jquery.spin.js') }}"></script>
   {% block scripts %}
   {% endblock scripts %}
 
