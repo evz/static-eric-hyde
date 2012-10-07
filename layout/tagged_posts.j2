@@ -2,27 +2,14 @@
 
 {% block main %}
 <section class="archives">
-<h1 class="tag title">{{ tag.name }}</h1>
-<ul class="posts clear">
+<h1 class="tag-title">Posts tagged {{ tag.name }}</h1>
 {% for resource in walker() -%}
-<li class="post clear">
+<div class="listing">
+    <h3 class="post-title"><a href="{{ content_url(resource.url) }}">{{ resource.meta.title }}</a></h3>
     <time datetime="{{ resource.meta.created.strftime('%Y-%m-%d') }}">
-        {{ resource.meta.created.strftime('%a, %d %b %Y') }}
+        <span class="label radius secondary">{{ resource.meta.created.strftime('%B %d, %Y') }}</span>
     </time>
-    <a href="{{ content_url(resource.url) }}">{{ resource.meta.title }}</a>
-    {% if resource.meta.tags %}
-    <ul class="tags">
-    {% for tag in resource.meta.tags %}
-    <li>
-        <a class="small" href="{{ content_url('tags/'~tag~'.html') }}">
-            {{ tag }}
-        </a>
-    </li>
-    {% endfor %}
-    </ul>
-    {% endif %}
-</li>
+</div>
 {%- endfor %}
-</ul>
 </section>
 {% endblock %}

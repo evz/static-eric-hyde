@@ -12,13 +12,6 @@ plugins:
 context:
     data:
         tweet_via: evanzanten
-        menu:
-            -
-                name: About this site
-                description: About
-                css_class: about
-                type: page
-                url: about-this-site.html
 meta:
     nodemeta: meta.yaml
     created: !!timestamp 2012-03-04 00:00:00

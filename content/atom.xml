@@ -1,0 +1,5 @@
+===
+title: Eric van Zanten - A blog
+extends: atom.j2
+listable: false
+===

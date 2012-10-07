@@ -1,6 +1,16 @@
 !!python/unicode '2011/10/2010-census-getting-setup.html': [blog.j2, base.j2, analytics.j2]
 !!python/unicode '2011/10/2010-census-leveraging-whats-already-been-done.html': [
   blog.j2, base.j2, analytics.j2]
+!!python/unicode '2011/10/22/omg-free-hosting-an-homage-to-harper-reed/index.html': [
+  blog.j2, base.j2, analytics.j2]
+!!python/unicode '2011/10/23/2010-census-leveraging-whats-already-been-done/index.html': [
+  blog.j2, base.j2, analytics.j2]
+!!python/unicode '2011/10/24/2010-census-getting-setup/index.html': [blog.j2, base.j2,
+  analytics.j2]
+!!python/unicode '2011/10/27/making-search-possible-on-a-static-site/index.html': [
+  blog.j2, base.j2, analytics.j2]
+!!python/unicode '2011/10/29/mapping-tools-101-a-few-things-ive-picked-up/index.html': [
+  blog.j2, base.j2, analytics.j2]
 !!python/unicode '2011/10/index.html': [listing.j2, macros.j2, base.j2, analytics.j2]
 !!python/unicode '2011/10/making-search-possible-on-a-static-site.html': [blog.j2,
   base.j2, analytics.j2]
@@ -9,13 +19,17 @@
 !!python/unicode '2011/10/omg-free-hosting-an-homage-to-harper-reed.html': [blog.j2,
   base.j2, analytics.j2]
 !!python/unicode '2011/10/untitled.html': [blog.j2, base.j2, analytics.j2]
+!!python/unicode '2011/11/13/2010-census-a-pain-in-my-block/index.html': [blog.j2,
+  base.j2, analytics.j2]
 !!python/unicode '2011/11/2010-census-a-pain-in-my-block.html': [blog.j2, base.j2,
   analytics.j2]
 !!python/unicode '2011/11/index.html': [listing.j2, macros.j2, base.j2, analytics.j2]
 !!python/unicode '2011/index.html': [listing.j2, macros.j2, base.j2, analytics.j2]
 !!python/unicode '2011/meta.yaml': []
-!!python/unicode 'about-this-site.html': [base.j2, analytics.j2]
+!!python/unicode 'about-this-site.html': [blog.j2, base.j2, analytics.j2]
+!!python/unicode 'about-this-site/index.html': []
 !!python/unicode 'about.html': [base.j2, analytics.j2]
+!!python/unicode 'atom.xml': [atom.j2, macros.j2]
 !!python/unicode 'blog/angry-post.html': []
 !!python/unicode 'blog/atom.xml': [atom.j2, macros.j2]
 !!python/unicode 'blog/excerpts.xml': [atom.j2, macros.j2]
@@ -42,10 +56,20 @@
 !!python/unicode 'media/css/site.css': []
 !!python/unicode 'media/css/style.css': []
 !!python/unicode 'media/css/syntax.css': []
+!!python/unicode 'media/css/wp-style.css': []
+!!python/unicode 'media/foundation/humans.txt': []
+!!python/unicode 'media/foundation/index.html': []
+!!python/unicode 'media/foundation/javascripts/app.js': []
+!!python/unicode 'media/foundation/robots.txt': []
+!!python/unicode 'media/foundation/stylesheets/app.css': []
+!!python/unicode 'media/foundation/stylesheets/foundation.css': []
+!!python/unicode 'media/foundation/stylesheets/foundation.min.css': []
 !!python/unicode 'media/js/libs/dd_belatedpng.js': []
 !!python/unicode 'media/js/libs/jquery-1.5.1.min.js': []
+!!python/unicode 'media/js/libs/jquery-1.7.2.min.js': []
 !!python/unicode 'media/js/libs/meta.yaml': []
 !!python/unicode 'media/js/libs/modernizr-1.7.min.js': []
+!!python/unicode 'media/js/search.js': []
 !!python/unicode 'media/meta.yaml': []
 !!python/unicode 'media/sass/_framework.scss': []
 !!python/unicode 'media/sass/style.scss': []
@@ -56,6 +80,7 @@
 !!python/unicode 'tags/Droplet.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'tags/GIS.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'tags/Google.html': [base.j2, tagged_posts.j2, analytics.j2]
+!!python/unicode 'tags/IRE.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'tags/Javascript.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'tags/Maps.html': [base.j2, tagged_posts.j2, analytics.j2]
 !!python/unicode 'tags/Python.html': [base.j2, tagged_posts.j2, analytics.j2]

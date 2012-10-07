@@ -1,6 +1,14 @@
 ---
-extends: base.j2
-default_block: main
-title: About BASIC
-description: The default hyde template
+extends: blog.j2
+default_block: post
+listable: false
+title: "About this site"
+description: "Technical details"
+created: !!timestamp '2011-10-24 10:30:00'
 ---
+So, what you&#8217;re looking at is the result of a weekend hack project inspired by [this post](http://www.nata2.org/2011/01/26/how-to-use-app-engine-to-host-static-sites-for-free/ "OMG FREE HOSTING: How to use GAE to host static sites for free") by Harper Reed back in January 2011. It outlines how he figured out how to leverage Google&#8217;s AppEngine to host his static sites for free using [DryDrop](http://drydrop.binaryage.com/ "DryDrop: Update AppEngine site by pushing to Github"). For some reason, after reading that, I kinda said, &#8220;huh, that&#8217;s neat&#8221;, and never really did anything about it. Until, early on the morning of October 22, I suddenly had the urge to write about some of the hacking projects I was working on but, other than paying for a domain, I didn&#8217;t want to bother with the nitty-gritty of managing any kind of hosted site.
+
+So, I downloaded DryDrop, setup a [vagrant](http://vagrantup.com/ "Vagrant") VM, and got to work. What you&#8217;re reading and looking at is the result. A static site that is updated by pushing content into this [github repo](https://github.com/evz/static-eric "Eric on github"). I managed to get comments going though [Disqus](http://disqus.com/ "Disqus") and figured that any other &#8220;interactive&#8221; elements can be easily wired in with a bit of Javascript magic. The only thing that I&#8217;m missing at the moment is some kind of search mechanism but considering there&#8217;s not much here at the moment, there&#8217;s not much need. At any rate, I&#8217;m looking at using something like [this](http://tapirgo.com/ "Tapir search") down the road. If you&#8217;re interested in how I accomplished this, [here&#8217;s a post](/2011/10/omg-free-hosting-an-homage-to-harper-reed.html "OMG FREE HOSTING: An homage to Harper Reed") I wrote after setting it up.
+
+Anyways, it&#8217;s not an original concept but I thought it was a pretty nice weekend hack project and maybe I&#8217;ll even start polluting the internet with some of my Python/Django/whatever musings in the coming months.
+

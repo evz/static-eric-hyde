@@ -1,14 +1,15 @@
 ---
 title: "2010 Census: A pain in my block"
-description: "Rendering arbitrary geometries from census blocks"
-created: !!timestamp '2011-11-13 10:30:00'
+description: "Creating arbitrary shapes out of census blocks"
+created: !!timestamp '2011-11-03 10:30:00'
 tags:
     - Census
-    - Maps 
+    - Django
+    - GIS
     - Python
-    - IRE
+    - Maps
+disqus: "108 http://www.static-eric.com/?p=108"
 ---
-
 {% mark excerpt %}
 
 I&rsquo;ve written about my very limited exploits in exploring and leveraging 2010 census data in the past but this weekend I finally got back around to doing something about it. What I ended up with is looking like a pretty useful tool for anyone looking at projecting census data onto arbitrary geographies.
@@ -25,7 +26,7 @@ I work for the [Bah&aacute;&rsquo;&iacute; Faith](http://www.bahai.us). The admi
 
 Once I got the [census.ire.org project](https://github.com/ireapps/census) setup I kinda sat back at said to myself, &ldquo;uh, OK, now what&hellip;&rdquo;. My first approach was actually to forget about all the juicy goodness in there and try to just get what I needed from the API that they offer. Problem is, block level data is not available through the API (which I suppose is understandable given that there are like, 8,000,000 census blocks in the U.S.).
 
-Since no one else had the data, it was starting to look like I would have to build it myself (\*gulp\*). In reading the docs for the IRE Django app, the parts that intrigued me the most were the parts that actually fetched census data and loaded it someplace. The someplace, in their case, was a MongoDB database which, at the end of the day, got dumped out and turned into flat JSONP files which were then uploaded to an S3 bucket so that schmoes like me could access it through the API. Problem with that, at least for me, was that I needed some way of comparing my arbitrary shapes with the census block shapes. What I needed, in a nutshell, was a [PostGIS](http://postgis.refractions.net/) database with both my arbitrary shapes and the census blocks. Luck for me, [I&rsquo;ve done that before](/2011/10/mapping-tools-101-a-few-things-ive-picked-up.html). 
+Since no one else had the data, it was starting to look like I would have to build it myself (\*gulp\*). In reading the docs for the IRE Django app, the parts that intrigued me the most were the parts that actually fetched census data and loaded it someplace. The someplace, in their case, was a MongoDB database which, at the end of the day, got dumped out and turned into flat JSONP files which were then uploaded to an S3 bucket so that schmoes like me could access it through the API. Problem with that, at least for me, was that I needed some way of comparing my arbitrary shapes with the census block shapes. What I needed, in a nutshell, was a [PostGIS](http://postgis.refractions.net/) database with both my arbitrary shapes and the census blocks. Luck for me, [I&rsquo;ve done that before](/2011/10/mapping-tools-101-a-few-things-ive-picked-up.html).
 
 So, what it came down to for me was to basically take what they were doing, rip out the MongoDB parts, put in PostGIS parts, and run some spatial lookups. Easy, right? Well, thanks to the work that was already done, yeah. But really, really boring.
 

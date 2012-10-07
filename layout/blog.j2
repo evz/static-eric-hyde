@@ -2,9 +2,9 @@
 
 {% block main -%}
 <article class="post">
-<h1 class="posttitle">{{ resource.meta.title }}</h1>
-<time class="post-author" datetime="{{ resource.meta.created.strftime('%Y-%m-%d') }}">
-    Posted: {{ resource.meta.created.strftime('%a, %d %b %Y') }}
+<h1 class="post-title">{{ resource.meta.title }}</h1>
+<time class="post-date" datetime="{{ resource.meta.created.strftime('%Y-%m-%d') }}">
+    <span class="label radius secondary">{{ resource.meta.created.strftime('%B %d, %Y') }}</span>
 </time>
 <a href="http://twitter.com/share"
     class="twitter-share-button"
@@ -33,7 +33,7 @@
     <div id="disqus_thread"></div>
     <script type="text/javascript">
         var disqus_shortname = 'static-eric';
-        var disqus_identifier = '{{ resource.meta.title }}';
+        var disqus_identifier = '{{ resource.meta.disqus or resource.meta.title }}';
         var disqus_url = 'http://static-eric.com/{{ resource.url }}';
         var disqus_developer = 1;
         (function() {

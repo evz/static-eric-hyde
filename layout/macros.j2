@@ -1,14 +1,16 @@
 {% macro render_excerpt(res, class=None) %}
 {% refer to res.url as post %}
+{% if res.meta.title %}
 <article {{'class='~class if class }}>
-<h1 class="posttitle"><a href="{{ content_url(res.url) }}">{{ res.meta.title }}</a></h1>
-<time class="post-author" datetime="{{ res.meta.created.strftime('%Y-%m-%d') }}">
-    Posted: {{ res.meta.created.strftime('%a, %d %b %Y') }}
+<h3 class="post-title"><a href="{{ content_url(res.url) }}">{{ res.meta.title }}</a></h3>
+<time class="post-date" datetime="{{ res.meta.created.strftime('%Y-%m-%d') }}">
+    <span class="label radius secondary">{{ res.meta.created.strftime('%B %d, %Y') }}</span>
 </time>
 <div class="entry">
 {{ post.excerpt|markdown|typogrify }}
 </div>
 </article>
+{% endif %}
 {% endmacro %}
 
 {% macro render_nav(menu, cls=None) -%}
