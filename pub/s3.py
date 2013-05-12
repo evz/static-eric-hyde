@@ -1,17 +1,16 @@
 from hyde.publisher import Publisher
-from hyde.fs import File, Folder
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
-from boto.exception import S3ResponseError
-import datetime
 import os
-import logging
+
 
 class S3CredentialsError(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
+
 
 class S3(Publisher):
     def initialize(self, settings):
@@ -21,16 +20,17 @@ class S3(Publisher):
         self.bucket = getattr(settings, 'bucket', None)
         reds = getattr(settings, 'redirects', None)
         self.redirects = []
-        for redirect in reds:
-            f,t = redirect.split(' => ')
-            self.redirects.append({'from': f, 'to': t})
+        if reds:
+            for redirect in reds:
+                f, t = redirect.split(' => ')
+                self.redirects.append({'from': f, 'to': t})
         if not self.key or not self.secret:
             try:
                 self.key = os.environ['AWS_ACCESS_KEY_ID']
                 self.secret = os.environ['AWS_SECRET_ACCESS_KEY']
             except KeyError:
                 raise S3CredentialsError('You need to define both an AWS key and secret in your site.yaml or as environment variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY')
-        
+
     def publish(self):
         super(S3, self).publish()
         conn = S3Connection(self.key, self.secret)

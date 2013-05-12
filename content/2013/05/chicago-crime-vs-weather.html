@@ -1,0 +1,126 @@
+---
+title: "Chicago Crime vs. Weather: Under the Hood"
+description: An attempt at sharing the nuts and bolts of my recent foray into data visualization
+created: !!timestamp '2013-05-12 10:00:00'
+tags:
+    - Chicago
+    - Python
+    - S3
+    - AWS
+    - Crime
+    - Data
+    - D3.js
+---
+{% mark excerpt %}
+
+I recently finished up a bit of a weekend hack project which involved wrangling quite a lot of quite a lot of data into something that could be easily viewed on the web. In case you ended up here first, you can check that out [over here](http://crime.static-eric.com). Basically, I took the 5,000,000 or so publicly available crime reports in Chicago since 2001 and compared it to the observed temperature data for that same time period to see if it was true that, as the temperature in Chicago goes up, so does the crime rate. Short answer: yes. More nuanced answer: mostly. What follows is an attempt to break down how I did what I did from a slightly more technical perspective in case anyone else wants to give this kind of thing a shot. **SPOILER ALERT**: It’s actually pretty easy.
+
+{% endmark %} 
+
+**First, the steps**
+
+1. Get the data
+2. Make it easier to query
+3. Figure out how to make it work on the web, preferably without server hardware
+4. Make it easy to update
+
+**But before that, getting setup**
+
+Just like everyone else these days, I got one one of those fancy Apple laptops but, for most of my app development work, I use a VM running a recent (usually 12.04) version of Ubuntu. To make that super simple to get going, I use [vagrant](http://vagrantup.com) which is a sort of suped-up version of the command line interface that ships with [VirtualBox](https://www.virtualbox.org). It takes care of a lot of the more obnoxious parts of running and provisioning multiple VMs on the same hardware. 
+
+On top of the OS, I’ve got your basic Python dev environment setup (which doesn’t really require any extra setup on Ubuntu if you’re OK using Python 2.7). Out of habit, I also put everything into a virtualenv but, really, if this is gonna be the only thing you’ve got going on the VM, it’s a bit of an unnecessarily pedantic step. 
+
+The last piece is the data layer. I chose MongoDB because I didn’t really want to have to figure out a schema ahead of time and I just wanted to load the raw data and get going. It also happens to have pretty awesome Python support. If you’re going to take a similar approach, I’d recommend getting the fresh stable version [directly from 10gen](http://docs.mongodb.org/manual/tutorial/install-mongodb-on-ubuntu/) instead of getting it from the OS’s package manager. You’ll get all the fancy new stuff including the [Aggregation Framework](http://docs.mongodb.org/manual/core/aggregation/) which will come in handy.
+
+**Get the Data**
+
+Thanks to the recent movement toward government transparency in the Chicago area, this is probably one of the easier steps. Just head over to the [City of Chicago’s Data Portal](https://data.cityofchicago.org) and start downloading. The particular data set that I was interested in for this project was [this monster](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2) which comes in at 5,221,094 rows as of this writing (and it seems to grow at a rate of about 1000 or so rows a day). 
+
+For any of the data sets available through that portal, you’ve got several options as to how to actually get what you want. You can get it 1000 records at a time through a web based API or by getting a big old ~1.3GB dump in various formats (JSON, CSV, TSV, etc). I chose the latter cause I wanted it now and I know a thing or two about what to do with a CSV file.
+
+In the interest of full transparency and because no one ever likes to admit to bonehead mistakes, I’d like to take a moment to highlight one that I made at this point. Now, I’m not much of a hardware/systems guy. I appreciate making things run on as minimal a footprint as I can and have been relatively lucky with the web based apps that I’ve deployed thus far but, if you get a ~1.3GB CSV file, don’t attempt to read it into memory on a VM running on your laptop all at once. Nothing bad really happens but then again, if you’re purpose is to do something with the data in the CSV file, you generally want _something_ to happen.
+
+Anyways, as I mentioned above, the idea here was to get this into a MongoDB instance so I could eventually get around to step 2: make the data easier to query. The simplest way that I found to get a CSV file into Mongo was to use the ``mongoimport`` [command line tool](http://docs.mongodb.org/manual/reference/mongoimport/#usage) that ships with any recent version of MongoDB. 
+
+So, if you run something like:
+
+    mongoimport --db chicago --collection crime --type csv --file /path/to/giant/dump.csv
+
+and then wait about 5 hours or so, you'll have a database in your MongoDB instance called ``chicago`` and a collection containing all the rows from that giant crime data dump called ``crime``. Your columns should be named exactly the same way that they were in the header row of the CSV file. If you’re not sure what that looks like you can run something like ``head -1 /path/to/giant/dump.csv`` and it’ll show you the first row of the file which will contain your column names. 
+
+To get the weather data, I headed over to the [NOAA](http://www.ncdc.noaa.gov/cdo-web/) and submitted a request for a dump of data from the weather station at O’Hare. It’s a bit of a screwy process (and there are dozens of weather stations to choose from) but the basics are: 
+
+1. Search for a weather station
+2. Make sure that the date range of data offered for that weather station match your criteria (the availability seems to vary)
+3. Fill out a couple online forms telling them what exactly it is that you’re after (basically which columns you want from the data set and what format you’d like it in)
+4. Give them an email address to send the link to download the data
+
+It took about 10 minutes or so for me to get an email with [this link](http://www1.ncdc.noaa.gov/pub/orders/cdo/154189.csv) to the dataset I was after (not sure how long that link will work so don’t be surprised if it’s broke). Which is pretty much the firehose view of all weather data from O’Hare between December 31, 2000 and May 1, 2013.
+
+The process for loading it into MongoDB was pretty much the same as above but I gave it a different collection name:
+
+    mongoimport --db chicago --collection weather --type csv --file /path/to/weather/dump.csv
+
+** Make the data easier to query **
+
+Now that I had the data, I wanted to get something out of it so I needed to make indexes for the fields that I knew I would want to query against. Well, I didn’t have to but it makes things go about a bajillion times faster. I’m a Python guy so I did this part using [pymongo](http://api.mongodb.org/python/current/) which is pretty much the same as doing it with the regular mongo client but, I dunno, I’m biased.
+
+Before actually creating the indexes, however, I needed to make sure that my date fields actually contained proper ``datetime`` objects. The nice thing about pymongo (and I’m sure the drivers for other languages as well) is that all you need to do to make sure Mongo gets a ``datetime`` is to convert it to an instance of a Python ``datetime``. I looked for a better way than looping over all 5,000,000 records but came up kinda dry (lemme know if you know better). Anyways, the code there looked kinda like this:
+
+<script src="https://gist.github.com/evz/5555872.js?file=make_datetimes.py"></script>
+
+If I remember right, that took around an hour or so. Maybe less.
+
+Another thing that I was interested in was being able to do geospatial queries which required creating [an index](http://docs.mongodb.org/manual/core/2dsphere/) on the location data. Mongo supports a limited range of geospatial queries against a limited number of shape types. But what it does do, it does pretty dang fast. The CSV dump that I got had a couple different ways of referring to where the crime actually happened, I had a few different options as to how to create the GeoJSON that Mongo needed to make the index. I chose to take the values that were in the “Latitude” and “Longitude” fields and merge them together into a GeoJSON object in the Location field (overwriting what was already there which was basically a longitude, latitude tuple). There was a hitch, however. I soon learned that not all crimes had a “Longitude” and “Latitude” or an “XCoordinate” and “YCoordinate” (which are the coordinates on the [state plane system](http://en.wikipedia.org/wiki/State_Plane_Coordinate_System)). So, in those cases, I just took the value of the “Block” field and asked Google to geocode those for me. Another code snippet to see how you might do that:
+
+<script src="https://gist.github.com/evz/5555872.js?file=make_geojson.py"></script>
+
+So, after cleaning up the schema a bit, I created an index for the date fields in the crime collection (“Updated Date”, and “Date”) and the “Primary Type” field which gives you the primary category that the particular crime falls into. Since the weather data is kinda puny at about 5000 rows, making an index doesn’t really save you any time over having Mongo just do a full table scan so I didn’t bother.
+
+I started a few times to go kick off the process of making an index for my newly restructured “Location” field but killed it because it was taking too long and, since I was getting tons of time to think about it, I realized I didn’t really need it (yet).
+
+** Making it work on the web **
+
+I’m kinda cheap when it comes to paying for web hosting so I wanted to make sure that I could put everything into an S3 bucket and make it all run client side. With that in mind, I created what has ended up being a pretty nifty resource sould anyone end up wanting to use it. 
+
+All the data that is needed to render the various visualizations are saved as JSON files and just loaded into a D3 generated graphic when you click the navigation links on the left. I’m not really sure embedding the file right here for you to look at is necessarily the best idea considering that D3 can be quite verbose so, if you’re interested in taking a look, [it’s over here](https://github.com/evz/crimesaroundus/blob/master/js/weather.js).
+
+Even better than that, I’ve made all the data that I’m using over there pretty simple to fetch and use in a couple different ways. Firstly, the way that I’m using it on the site which is as JSON. All the data that is used for the visualization can be grabbed thusly:
+
+    http://crime.static-eric.com/data/weather/assault.json
+
+That will get you all the data comparing the number of assaults committed on days at a given temperature. You can swap out ``assault`` for any of the other primary crime types (I’ve gone into quite a but more detail about this stuff [over here](http://crime.static-eric.com/get-the-data.html)). There are also CSV dumps for those wise guys who want to get a bit more serious about checking my results. Those can be grabbed like this:
+
+    http://crime.static-eric.com/data/weather/[year].csv
+
+There is also a full CSV dump of everything that can be gotten by swapping out the year for ``full_dump``. 
+
+I’m also maintaining a day by day summary of the data that gets into a pretty decent level of detail (you can see what the actual layout of the files looks like over in [the docs](http://crime.static-eric.com/get-the-data.html) that I put together). The day by day files can be grabbed using this setup:
+
+    http://crime.static-eric.com/data/2011/12/11.json
+    
+That will get you the daily summary for December 11, 2011. Just swap out the different parts of the date going back as far as January 1, 2001 and as recently as a week ago.
+
+** Making it easy(ish) to update **
+
+The actual processing part of this is handled in a sort of manual way and I’m pretty sure there has got to be a better way (if you know one, hit me up in the comments. I love to learn). There are basically 2 phases, the loading phase and the dumping phase, each of which is currently controlled by a python script currently (and, will shortly be automated so I don’t have to run these things every morning). I suppose the easiest way of sharing this is to link to the files over on github because they’re a bit verbose. Here’s the [loader](https://github.com/evz/crimeweatherupdater/blob/master/loader.py) and the [dumper](https://github.com/evz/crimeweatherupdater/blob/master/dumper.py). 
+
+Basic breakdown of what’s going on over in the loader script: If you look way down at the bottom, you’ll see that little setup that is typically done for python scripts and notice that there are two functions that are called ``get_crimes`` and ``get_most_wanted``. 
+
+``get_crimes`` fetches the 4000 most recent records from [here](https://data.cityofchicago.org/Public-Safety/Crimes-2013/a95h-gwzm). I found that a version that was filtered to only include records from this year responded a bit quicker than the full version. It then attempts to geocode where it needs to (not every record has a longitude and latitude), and then either updates an existing record or creates a new one (that’s what that ``upsert=True`` business is all about on line 91). 
+
+``get_most_wanted`` fetches the most wanted data from [here](http://api1.chicagopolice.org/clearpath/documentation),  gets a mugshot based upon the warrant number but instead of saving it to MongoDB, it actually just dumps it out as JSON directly to S3. It’s only 25 records so I figured it didn’t really really require a collection. Although, I suppose I am collecting those as well (based upon warrant number) so, who knows, maybe I’ll do something with it that stuff eventually.
+
+Similarly, the dumper script calls three functions (well, 2 all the time and a third one if you give it a date): ``dumpit``, ``dump_by_temp``, and ``dump_to_csv``. As I’m typing this, I’m realizing how unintentionally scatological this script is. Sorry about that. 
+
+``dumpit`` dumps everything out by date given a range. Right now I’ve got it set to dump everything since April 25, 2013 (which was just sort of an arbitrary choice, really) because all the older stuff is already there. The files that get generated by this function 
+
+``dump_by_temp`` creates the JSON files for the for the [Crime vs Weather](http://crime.static-eric.com) visualization. This is the part that can probably use help becoming more efficient. I was hoping to make it take advantage of [MongoDB’s aggregation framework](http://docs.mongodb.org/manual/core/aggregation/) but I couldn’t figure it out so I basically just did all the aggregation in Python. 
+
+``dump_to_csv`` makes the CSV dumps. Uh, yup.
+
+** So, what’s next **
+
+In the few days since I made this thing public, I have gotten a tremendous response (including a write up in [Chicago Magazine](http://www.chicagomag.com/Chicago-Magazine/The-312/May-2013/Crime-Follows-Temperature-In-Chicago/)) and have correspondingly gotten a ton of great ideas as to how to refine this graphic as well as ideas for new ones. The [Smart Chicago Collaborative](http://www.smartchicagocollaborative.org) actually stepped up and has given me access to one of their hosted EC2 instances so I should be able to sustain this sort of thing indefinitely. I also attended the [Safe Communities hackathon](https://plus.google.com/events/c1ikcblaaeru5o7u3tcg2kk5ua4) hosted by Google on May 11th and was able to get in touch with folks who were way smarter than me and who gave me some tremendous suggestions, not to mention meeting up with a few folks who have practical application for what I’m collecting. Actually, one thing I’m thinking of doing right away is leveraging the some of the techniques that the [Chicago Tribune’s Crime API](https://github.com/newsapps/chicagocrime/blob/master/docs/api_docs.md) to tune out some of the noise. Most notably, instead of using the “Primary Types” of crime to put things into buckets, they’re using the [IUCR](https://data.cityofchicago.org/Public-Safety/Chicago-Police-Department-Illinois-Uniform-Crime-R/c7ck-438e) together with the secondary description and whether or not the crimes are considered index crimes representative of more serious crimes (more on that [here](https://portal.chicagopolice.org/portal/page/portal/ClearPath/News/Statistical%20Reports/Index%20Crime%20Statistics)). They end up with larger, more meaningful groupings of crime into “Violent”, “Property”, and “Quality of life” crimes. 
+
+It’s amazing what can happen when you make something people can relate to. It’s even more amazing when it’s something that you enjoy making. If you’re at all interested in collaborating or have ideas, hit me up in the comments.
